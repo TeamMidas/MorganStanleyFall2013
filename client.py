@@ -109,7 +109,7 @@ def main():
 
     turn = getTurnNo(payout)
     print "CURRENT TURN IS: " + str(turn)
-    print json.dumps(sumWebTransactions(payout), sort_keys=True, indent=4, separators=(',', ': '))
+    print json.dumps(sumWebServers(payout), sort_keys=True, indent=4, separators=(',', ': '))
 
 main()
 
