@@ -22,6 +22,7 @@ import requests
 
 url = 'http://hermes.wha.la/api/hermes'
 token = 'f6ead613-de05-4a51-bda4-76ae2448c1b8'
+<<<<<<< HEAD
 
 def main():
     data = {'Command': 'INIT', 'Token': token}
@@ -29,6 +30,7 @@ def main():
     r = requests.post(url, data=json.dumps(data), headers=headers)
     payout = r.json()
     print type(payout)
+    print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
 
 main()
 
