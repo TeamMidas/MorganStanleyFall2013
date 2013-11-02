@@ -234,36 +234,36 @@ def calcNext(history, dx, dx2):
             if(dx > 0):
                 ans = current + int(1.125 * dx)
             else:
-                ans = current - int(.5 * dx)
+                ans = current - int(.875 * dx)
         else:
             if (dx < 0):
                 ans = current - int(1.125 * dx)
             else:
-                ans = current + int(.5 * dx)
+                ans = current + int(.875 * dx)
 
     if(trend == 3 or trend == -3):
         if(trend > 0):
             if(dx > 0):
                 ans = current + int(1.25 * dx)
             else:
-                ans = current - int(.25 * dx)
+                ans = current - int(.75 * dx)
         else:
             if(dx < 0):
                 ans = current - int(1.25 * dx)
             else:
-                ans = current + int(.25 * dx)
+                ans = current + int(.75 * dx)
 
     if(trend == 4 or trend == -4):
         if(trend > 0):
             if(dx > 0):
                 ans = current + int(1.5 * dx)
             else:
-                ans = current - (.125 * dx)
+                ans = current - (.5 * dx)
         else:
             if (dx < 0 ):
                 ans = current - int(1.5 * dx)
             else:
-                ans = current + int(.125 * dx)
+                ans = current + int(.5 * dx)
 
     return ans
 
@@ -289,7 +289,7 @@ def spikeDetection(a, region):
     else:
         temp = pNA
 
-    if(abs(a[4] - temp) > 300):
+    if(abs(a[4] - temp) > 300 and (abs(a[4]) - temp) > 300):
         return a[4]
 
     i = 1
@@ -381,8 +381,10 @@ def main():
         calcChange('EU')
         calcChange('NA')
         print ""
+        print getProfitAccumulated(payout)
 
         r = nextTurn()
-        #raw_input("Press Enter to continue...")
+        if(turn > 2400):
+            raw_input("Press Enter to continue...")
 
 main()
