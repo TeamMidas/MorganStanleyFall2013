@@ -22,19 +22,15 @@ import requests
 
 url = 'http://hermes.wha.la/api/hermes'
 token = 'f6ead613-de05-4a51-bda4-76ae2448c1b8'
-data = {'Command': 'INIT', 'Token': token}
-headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-r = requests.post(url, data=json.dumps(data), headers=headers)
 
-payout = r.text
+def main():
+    data = {'Command': 'INIT', 'Token': token}
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    r = requests.post(url, data=json.dumps(data), headers=headers)
+    payout = r.json()
+    print type(payout)
 
-print ""
-print payout
+main()
 
 #data = {'Command': 'PLAY', 'Token': 'f6ead613-de05-4a51-bda4-76ae2448c1b8'}
 #r = requests.post(url, data=json.dumps(data), headers=headers)
-
-print ""
-print ""
-print "WTF"
-print ""
