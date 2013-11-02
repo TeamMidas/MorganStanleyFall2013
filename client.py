@@ -22,12 +22,7 @@ import requests
 
 url = 'http://hermes.wha.la/api/hermes'
 token = 'f6ead613-de05-4a51-bda4-76ae2448c1b8'
-
-def getError(payout):
-    return payout['Error']
-
-def getStatus(payout):
-    return payout['Status']
+headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 
 def getCostIncured(payout):
     return payout['ServerState']['CostIncured']
@@ -91,37 +86,36 @@ def sumWebTransactions(payout):
     AP = getWebTransactions(payout, 'AP')
     EU = getWebTransactions(payout, 'EU')
     NA = getWebTransactions(payout, 'NA')
-    return AP + EU + NA
+    print "Asia: " + str(AP)
+    print "Europe: " + str(EU)
+    print "North America: " + str(NA)
 
+def nextTurn():
+    data = {'Command': 'PLAY', 'Token': token}
+    return requests.post(url, data=json.dumps(data), headers=headers)
 
+def init():
+    data = {'Command': 'INIT', 'Token': token}
+    r = requests.post(url, data=json.dumps(data), headers=headers)
 
 def main():
-    data = {'Command': 'INIT', 'Token': token}
-    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-#init
-    r = requests.post(url, data=json.dumps(data), headers=headers)
+    init()
 
-#turn 1
-    data = {'Command': 'PLAY', 'Token': token}
-    r = requests.post(url, data=json.dumps(data), headers=headers)
+    r = nextTurn()
 
-#turn 2
-    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
-    r = requests.post(url, data=json.dumps(data), headers=headers)
+    while(1):
+        payout = r.json()
 
-    data = {'Command': 'PLAY', 'Token': token}
-    r = requests.post(url, data=json.dumps(data), headers=headers)
-    payout = r.json()
+        turn = getTurnNo(payout)
+        print "CURRENT TURN IS: " + str(turn)
 
-    turn = getTurnNo(payout)
-    print "CURRENT TURN IS: " + str(turn)
-
-    print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
-
-#    print json.dumps(sumWebServers(payout), sort_keys=True, indent=4, separators=(',', ': '))
+#    print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
+        sumWebTransactions(payout)
+        r = nextTurn()
 
 
 main()
 
-#data = {'Command': 'PLAY', 'Token': 'f6ead613-de05-4a51-bda4-76ae2448c1b8'}
-#r = requests.post(url, data=json.dumps(data), headers=headers)
+#    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
+#    r = requests.post(url, data=json.dumps(data), headers=headers)
+#    print r.text
