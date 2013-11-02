@@ -25,16 +25,14 @@ token = 'f6ead613-de05-4a51-bda4-76ae2448c1b8'
 data = {'Command': 'INIT', 'Token': token}
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 r = requests.post(url, data=json.dumps(data), headers=headers)
-
-payout = r.text
+#echo '{"foo": "lorem", "bar": "ipsum"}' | python -mjson.tool
+#payout = r.text
+payout = r.json()
 
 print ""
-print payout
+print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
 
 #data = {'Command': 'PLAY', 'Token': 'f6ead613-de05-4a51-bda4-76ae2448c1b8'}
 #r = requests.post(url, data=json.dumps(data), headers=headers)
 
-print ""
-print ""
-print "WTF"
-print ""
+#payout = r.json()
