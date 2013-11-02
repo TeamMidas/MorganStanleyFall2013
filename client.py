@@ -233,9 +233,9 @@ def calcNext(history, dx, dx2):
     ans = 0
     if(dx * dx2 < 0 and abs(dx) < 20):
         if(dx > 0):
-            ans = current + int(1.125 * dx)
+            ans = current + int(1.06 * dx)
         else:
-            ans = current - int(1.125 * dx)
+            ans = current - int(1.06 * dx)
 
     if(trend == 1 or trend == -1):
         ans = current
@@ -300,8 +300,13 @@ def spikeDetection(a, region):
     else:
         temp = pNA
 
-    if(abs(a[4] - temp) > 300 and (abs(a[4]) - temp) > 300):
-        return a[4]
+    if(abs(a[4] - temp) > 300):
+        if(abs(a[4] - a[3]) < 200):
+            return int(a[4] * 0.5)
+        elif(abs(a[3] - a[2]) < 200):
+                 return int(a[4] * 0.8)
+        else:
+            return a[4]
 
     i = 1
     if (abs(a[4] - temp) > 80):
@@ -361,13 +366,15 @@ def main():
         turn = getTurnNo(payout)
         print ""
         print "CURRENT TURN IS: " + str(turn)
-        print getTransactionTime(payout)
+        print "TIME IS: " + getTransactionTime(payout)
+        print ""
         printWebTransactions(payout)
         print ""
 
-        print "Money earned so far: " + json.dumps(getProfitAccumulated(payout), sort_keys=True, indent=4, separators=(',', ': '))
-        print "Money earned this turn: " + json.dumps(getProfitEarned(payout), sort_keys=True, indent=4, separators=(',', ': '))
-        
+        print "Money earned so far: " + str(getProfitAccumulated(payout))
+        print "Money earned this turn: " + str(getProfitEarned(payout))
+        print ""
+
         if(turn > 10):
             if(difAP < abs(hAP[4]-pAP)):
                 difAP = abs(hAP[4] - pAP)
@@ -409,7 +416,7 @@ def main():
 #        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
         r = nextTurn()
-        if(turn > 2400):
-            raw_input("Press Enter to continue...")
+        #if(turn > 2400):
+        #    raw_input("Press Enter to continue...")
 
 main()
