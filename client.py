@@ -84,6 +84,15 @@ def getTurnNo(payout):
 def getTransactionTime(payout):
     return payout['ServerState']['TransactionTime']
 
+def getWebTransactions(payout, region):
+    return getWebRegions(payout)[region]['NoOfTransactionsInput']
+
+def sumWebTransactions(payout):
+    AP = getWebTransactions(payout, 'AP')
+    EU = getWebTransactions(payout, 'EU')
+    NA = getWebTransactions(payout, 'NA')
+    return AP + EU + NA
+
 
 def main():
     data = {'Command': 'INIT', 'Token': token}
@@ -100,7 +109,7 @@ def main():
 
     turn = getTurnNo(payout)
     print "CURRENT TURN IS: " + str(turn)
-    print json.dumps(getWebRegions(payout), sort_keys=True, indent=4, separators=(',', ': '))
+    print json.dumps(sumWebTransactions(payout), sort_keys=True, indent=4, separators=(',', ': '))
 
 main()
 
