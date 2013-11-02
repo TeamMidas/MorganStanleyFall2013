@@ -23,13 +23,77 @@ import requests
 url = 'http://hermes.wha.la/api/hermes'
 token = 'f6ead613-de05-4a51-bda4-76ae2448c1b8'
 
+def getError(payout):
+    return payout['Error']
+
+def getStatus(payout):
+    return payout['Status']
+
+def getCostIncured(payout):
+    return payout['ServerState']['CostIncured']
+
+def getServerCost(payout):
+    return payout['ServerState']['CostPerServer']
+
+def getDQTime(payout):
+    return payout['ServerState']['DisqualifyTimeInMilliSeconds']
+
+def getInfrastructureUpgrades(payout):
+    return payout['ServerState']['InfraStructureUpgradeLevels']
+
+def getInfrastructureState(payout):
+    return payout['ServerState']['InfraStructureUpgradeState']
+
+def getPlayFileName(payout):
+    return payout['ServerState']['InfraStructureUpgradeState']
+
+def getProfitAccumulated(payout):
+    return payout['ServerState']['ProfitAccumulated']
+
+def getResearchUpgrades(payout):
+    return payout['ServerState']['ResearchUpgradeLevels']
+
+def getResearchUpgardeState(payout):
+    return payout['ServerState']['ResearchUpgradeState']
+
+############# PROBABLY THE IMPORTANT STUFF ##########################
+def getServerTiers(payout):
+    return payout['ServerState']['ServerTiers']
+
+def getWebServers(payout):
+    return getServerTiers(payout)['WEB']
+ 
+def getWebRegions(payout):
+    return getWebServers(payout)['ServerRegions']
+
+def getJavaServers(payout):
+    return getServerTiers(payout)['JAVA']
+
+def getJavaRegions(payout):
+    return getJavaServers(payout)['ServerRegions']
+
+def getDBServers(payout):
+    return getServerTiers(payout)['DB']
+
+def getDBRegions(payout):
+    return getDBServers(payout)['ServerRegions']
+
+def getTurnNo(payout):
+    return payout['ServerState']['TurnNo']
+
+def getTransactionTime(payout):
+    return payout['ServerState']['TransactionTime']
+
+
 def main():
     data = {'Command': 'INIT', 'Token': token}
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
     r = requests.post(url, data=json.dumps(data), headers=headers)
     payout = r.json()
+    turn = getTurnNo(payout)
     print type(payout)
-    print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
+#    print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
+    print json.dumps(getWebRegions(payout), sort_keys=True, indent=4, separators=(',', ': '))
 
 main()
 
