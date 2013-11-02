@@ -35,8 +35,6 @@ difAP = 0
 difNA = 0
 difEU = 0
 fig = plt.figure()
-plt.axis([0,10,0,3000])
-#plt.axis([0,10000,0,10000])
 
 class AutoVivification(dict):
     """Implementation of perl's autovivification feature."""
@@ -399,9 +397,12 @@ def main():
 
         #plots (turn, profit) as scatter plot
         plt.axis([0,turn+10,0,3000])
-        plt.scatter(turn, getProfitEarned(payout))
+        #red is Profit Earned this turn
+        plt.scatter(turn, getProfitEarned(payout), color='green')
         plt.pause(0.00000000000000000000000000000000000000000001)
         plt.draw()
+
+
 
 #        print 'DB NODES IN NA: ' + json.dumps(getDBNodeCount(payout, 'NA'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #        print 'DB NODES IN EU: ' + json.dumps(getDBNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
