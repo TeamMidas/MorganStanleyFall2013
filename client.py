@@ -205,10 +205,11 @@ def main():
 #        print "HISTORY OF ASIA: " + str(hAP)
 #        print "HISTORY OF EUROPE: " + str(hEU)
 #        print "HISTORY OF AMERICA: " + str(hNA)
-        calcChange('AP')
-        calcChange('EU')
-        calcChange('NA')
-        print ""
+#        calcChange('AP')
+#        calcChange('EU')
+#        calcChange('NA')
+#        print ""
+
         r = nextTurn()
         raw_input("Press Enter to continue...")
 
