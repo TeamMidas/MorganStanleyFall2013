@@ -676,7 +676,7 @@ def main():
             z = z + javaLogic(payout, 'NA')
             z = z + dataLogic(payout)
             if(z > 0):
-                if(wtf == 1 and getProfitAccumulated(payout) >= 336000):
+                if(wtf == 1 and getProfitAccumulated(payout) >= 300000):
                     upgradesResearch("Grid")
                     #lol = turn
                     wtf = 0
