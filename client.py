@@ -84,7 +84,7 @@ def getProfitAccumulated(payout):
 def getResearchUpgrades(payout):
     return payout['ServerState']['ResearchUpgradeLevels']
 
-def getResearchUpgardeState(payout):
+def getResearchUpgradeState(payout):
     return payout['ServerState']['ResearchUpgradeState']
 
 def getServerTiers(payout):
@@ -160,14 +160,10 @@ def setNodes(tier, region, count):
     CR['Servers'][tier]['ServerRegions'][region]['NodeCount'] = count
 
 def upgradesInfrastructure(infrastructure):
-    if(len(CR) == 0):
-        CR['Servers'] = {}
-    CR['Servers']['UpgradeInfrastructure'] = infrastructure
+    CR['UpgradeInfrastructure'] = infrastructure
 
 def upgradesResearch(research):
-    if(len(CR) == 0):
-        CR['Servers'] = {}
-    CR['Servers']['UpgradeToResearch'] = research
+    CR['UpgradeToResearch'] = research
 
 """
 This should give upgrades
@@ -446,7 +442,7 @@ def dataLogic(payout, region):
     difference = expected - capacity
     needed = 0
 
-    print "WHEEE DATA REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
+    print "DATA REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
     print ""
     if(difference > serverValue):
         needed = int(difference / serverValue) - (len(goingUpData[region]))
@@ -567,9 +563,10 @@ def main():
     avgAP = 0.0
     avgEU = 0.0
     avgNA = 0.0
+    researchTicker = 4320
     init()
     r = nextTurn()
-
+    wtf = 1
 #    while(1):
 #        r = nextTurn()
 #        payout = r.json()
@@ -643,12 +640,18 @@ def main():
             z = z + javaLogic(payout, 'NA')
             z = z + dataLogic(payout, 'EU')
             if(z > 0):
+                if(wtf == 1):
+                    upgradesResearch("Grid")
+                    wtf = 0
+                    raw_input("WTF IT RAN")
                 data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
                 print data
                 r = requests.post(url, data=json.dumps(data), headers=headers)
                 clearCR()
+                print " STUFFFF"
                 print r.text
-        
+                print " STUFFFFF"
+
 #        print "ASIA WEB SERVERS: " + str(goingUpWeb['AP'])
 #        print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
 #        print "AMERICA WEB SERVERS: " + str(goingUpWeb['NA'])
@@ -658,11 +661,14 @@ def main():
         print "ASIA JAVA SERVERS DOWN: " + str(goingDownJava['AP'])
         print "EUROPE JAVA SERVERS DOWN: " + str(goingDownJava['EU'])
         print "AMERICA JAVA SERVERS DOWN: " + str(goingDownJava['NA'])
-
+        print ""
+        print(getServerCost(payout))
+        print 'RESEARCH: ' + json.dumps(getResearchUpgradeState(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
         r = nextTurn()
-        print r.text
-        if(turn > 10000):
-            raw_input("Press Enter to continue...")
+#        print r.text
+        raw_input("Press enter")
+        #if(turn > 50):
+         #   raw_input("Press Enter to continue...")
             #plt.show()
         #plots (turn, profit) as scatter plot
 #        plt.axis([0,turn+10,0,3000])
