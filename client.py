@@ -49,6 +49,15 @@ def getCostIncured(payout):
 def getServerCost(payout):
     return payout['ServerState']['CostPerServer']
 
+def getProfitConstant(payout):
+    return payout['ServerState']['ProfitConstant']
+
+def getProfitAccumulated(payout):
+    return payout['ServerState']['ProfitAccumulated']
+
+def getProfitEarned(payout):
+    return payout['ServerState']['ProfitEarned']
+
 def getDQTime(payout):
     return payout['ServerState']['DisqualifyTimeInMilliSeconds']
 
@@ -289,7 +298,7 @@ def init():
 
 #    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    print json.dumps(getResearchUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
     r = requests.post(url, data=json.dumps(data), headers=headers)
