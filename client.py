@@ -411,14 +411,14 @@ def javaLogic(payout, region):
     elif(difference < serverValue):
         needed = int(difference / serverValue) - (len(goingDownJava[region]))
         if(online + needed <= 1):
-             return 0
+             needed = needed+1
         if(needed < 0):
             print "REMOVED: " + str(needed)
             while(needed < 0):
+                setNodes('JAVA', region, needed)
                 goingDownJava[region][upID] = 1
                 downID = downID+1
                 needed = needed+1
-            setNodes('JAVA', region, needed)
             return 1
     return 0
 
@@ -595,9 +595,16 @@ def main():
                 r = requests.post(url, data=json.dumps(data), headers=headers)
                 clearCR()
         
-        print "ASIA WEB SERVERS: " + str(goingUpWeb['AP'])
-        print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
-        print "AMERICA WEB SERVERS: " + str(goingUpWeb['NA'])
+#        print "ASIA WEB SERVERS: " + str(goingUpWeb['AP'])
+#        print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
+#        print "AMERICA WEB SERVERS: " + str(goingUpWeb['NA'])
+        print "ASIA JAVA SERVERS: " + str(goingUpJava['AP'])
+        print "EUROPE JAVA SERVERS: " + str(goingUpJava['EU'])
+        print "AMERICA JAVA SERVERS: " + str(goingUpJava['NA'])
+        print "ASIA JAVA SERVERS DOWN: " + str(goingDownJava['AP'])
+        print "EUROPE JAVA SERVERS DOWN: " + str(goingDownJava['EU'])
+        print "AMERICA JAVA SERVERS DOWN: " + str(goingDownJava['NA'])
+
         r = nextTurn()
         if(turn > 1000):
             raw_input("Press Enter to continue...")
