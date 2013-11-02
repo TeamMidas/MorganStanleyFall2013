@@ -102,10 +102,10 @@ def sumWebTransactions(payout):
     NA = getWebTransactions(payout, 'NA')
     return AP + EU + NA
 
-#    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
-def setWebNodes():
-    return "'ChangeRequest' : {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}";
 
+#'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}
+def setNodes(tier, region, num):
+    return {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {tier: {'ServerRegions': {region: {'NodeCount': num}}}}}}
 
 
 def main():
@@ -125,7 +125,8 @@ def main():
     print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
 #turn 2
-    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
+#    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
+    data = setNodes('WEB', 'EU', -1)
     r = requests.post(url, data=json.dumps(data), headers=headers)
 
     data = {'Command': 'PLAY', 'Token': token}
