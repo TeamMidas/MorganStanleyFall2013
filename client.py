@@ -96,6 +96,9 @@ def getWebRegions(payout):
 def getWebNodeCount(payout, region):
     return getWebRegions(payout)[region]['NodeCount']
 
+def getWebCapacity(payout):
+    return getWebServers(payout)['ServerPerformance']['CapactityLevels'][0]['UpperLimit']
+
 def getJavaServers(payout):
     return getServerTiers(payout)['JAVA']
 
@@ -339,7 +342,7 @@ def init():
 
 
 #    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#    print json.dumps(getResearchUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#    print json.dumps(getWebCapacity(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
@@ -419,8 +422,8 @@ def main():
         plt.scatter(turn, TransAP, color='orange')
         
         #this is for live plotting only
-        plt.pause(0.00000000000000000000000000000000000000000001)
-        plt.draw()
+#        plt.pause(0.00000000000000000000000000000000000000000001)
+#        plt.draw()
 
 
 #        print 'DB NODES IN NA: ' + json.dumps(getDBNodeCount(payout, 'NA'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
@@ -430,6 +433,6 @@ def main():
         r = nextTurn()
 #        if(turn > 2400):
 #            plt.show()
-#            raw_input("Press Enter to continue...")
+        raw_input("Press Enter to continue...")
 
 main()
