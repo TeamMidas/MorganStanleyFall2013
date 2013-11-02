@@ -30,6 +30,9 @@ hAP = []
 hEU = []
 hNA = []
 highTurn = 0
+difAP = 0
+difNA = 0
+difEU = 0
 
 class AutoVivification(dict):
     """Implementation of perl's autovivification feature."""
@@ -264,6 +267,7 @@ def findTrend(a):
             i = i-1
     
     return i
+    
 
     #lagrange save for maybe later use
 #    p = (temp[0] * 8) + (temp[1] * -15) + (temp[2] * 16) + (temp[3] * -6) + (temp[4] * 2)
@@ -295,13 +299,14 @@ def init():
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
     r = requests.post(url, data=json.dumps(data), headers=headers)
 
-
-
 def main():
     global highTurn
-    difAP = 0
-    difEU = 0
-    difNA = 0
+    global difAP
+    global difEU
+    global difNA
+    avgAP = 0.0
+    avgEU = 0.0
+    avgNA = 0.0
     init()
     r = nextTurn()
 
@@ -326,6 +331,13 @@ def main():
                 difEU = abs(hEU[4]-pEU)
             if(difNA < abs(hNA[4] - pNA)):
                 difNA = abs(hNA[4] - pNA)
+            avgAP = (((avgAP * (turn - 11)) + abs(hAP[4] - pAP)) / (turn - 10))
+            avgEU = (((avgEU * (turn - 11)) + abs(hEU[4] - pEU)) / (turn - 10))
+            avgNA = (((avgNA * (turn - 11)) + abs(hNA[4] - pNA)) / (turn - 10))
+            print "Average Mistake ASIA: " + str(avgAP)
+            print "Average Mistake EUROPE: " + str(avgEU)
+            print "Average Mistake AMERICA: " + str(avgNA)
+            print ""
             print "Highest mistake ASIA: " + str(difAP)
             print "Highest mistake EUROPE: " + str(difEU)
             print "Highest mistake AMERICA: " + str(difNA)
