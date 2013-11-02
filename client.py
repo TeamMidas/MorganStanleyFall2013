@@ -37,12 +37,12 @@ difEU = 0
 
 trend = 0
 
-goingUpWeb = {'AU': {}, 'EU': {}, 'NA': {}}
-goingUpJava = {'AU': {}, 'EU': {}, 'NA': {}}
-goingUpData = {'AU': {}, 'EU': {}, 'NA': {}}
+goingUpWeb = {'AP': {}, 'EU': {}, 'NA': {}}
+goingUpJava = {'AP': {}, 'EU': {}, 'NA': {}}
+goingUpData = {'AP': {}, 'EU': {}, 'NA': {}}
 
-goingDownJava = {'AU': {}, 'EU': {}, 'NA': {}}
-goingDownData = {'AU': {}, 'EU': {}, 'NA': {}}
+goingDownJava = {'AP': {}, 'EU': {}, 'NA': {}}
+goingDownData = {'AP': {}, 'EU': {}, 'NA': {}}
 
 
 downID = 1
@@ -341,6 +341,8 @@ def spikeDetection(a, region):
         return 0
 
 def webLogic(payout, region):
+    global upID
+    global downID
     expected = 0
     if(region == 'AP'):
         expected = pAP
@@ -350,35 +352,50 @@ def webLogic(payout, region):
         expected = pNA
 
     online = getWebNodeCount(payout, region)
-
     serverValue = int(180 * 1.2)
+    print "WUT: " + str(serverValue)
     capacity = online * serverValue
-    change = capacity - expected
+    print "CAPACITY: " + str(capacity)
+    change = (capacity - expected)
+    needed = 0
 
-    if(abs(change) < (serverValue / 2)):
+    print "CHANGE: " + str(change) + " CAPACITY: " + str(capacity)
+    print ""
+    if(abs(change) < serverValue):
 #        setNode('WEB', region, 0)
         return 0
-    if(abs(change) < serverValue and abs(trend) > 1):
+    if(abs(change) > serverValue and abs(trend) > 1):
         if (change > 0 and trend > 0):
-            setNode('WEB', region, 1)
+            print "ADDED ONE"
+            setNodes('WEB', region, 1)
             goingUpWeb[region][upID] = 2
             upID = upID+1
             return 1
         elif(change < 0 and trend < 0 and online > 1):
-            setNode('WEB', region, -1)
+            print "REMOVED ONE"
+            setNodes('WEB', region, -1)
             return 1
-    if(abs(change) >= (1.5 * serverValue) and abs(trend) > 2):
-        if(change > 0 and trend >= 2):
-            needed = int(math.ceil( float(change) / serverValue)) - len(goingUpWeb[region])
+    if(abs(change) >= (1.5 * serverValue)):
+        if(change > 0):
+            needed = int(math.ceil( float(change) / serverValue)) - (len(goingUpWeb[region] )* 180)
+            print "ADDED THIS MANY: " + str(needed)
             if (needed > 0):
-                setNode('WEB', region, needed)
+                i = needed
+                while(i > 0):
+                    goingUpWeb[region][upID] = 2
+                    i=i-1
+                    upID= upID+1
+                setNodes('WEB', region, needed)
+                print "ACTUALLY RAN"
                 return 1
             else:
                 return 0
-        elif(change < 0 and trend >= 2):
-            needed = int(round(float(change) / serverValue))
+        elif(change < 0):
+            needed = int(round(float(change) / serverValue)) - (len(goingUpWeb[region] )* 180)
+            print "REMOVED THIS MANY: " + str(needed)
             if(needed - online > 1):
-                setNode('WEB', region, needed)
+                print "ACTUALLY RAN"
+                setNodes('WEB', region, needed)
                 return 1
             else:
                 return 0
@@ -399,10 +416,71 @@ def init():
     r = requests.post(url, data=json.dumps(data), headers=headers)
     payout = r.json()
 
+def tickDown():
+    popKey = {}
+    for i in goingUpWeb:
+        for j in goingUpWeb[i]:
+            if (goingUpWeb[i][j] <= 0):
+                popKey[i] = j
+            else:
+                goingUpWeb[i][j] = goingUpWeb[i][j] - 1
+
+    for i in popKey:
+        goingUpWeb[i].pop(j, None)
+
+    popKey = {}
+    for i in goingUpJava:
+        for j in goingUpJava[i]:
+            if (goingUpJava[i][j] <= 0):
+                popKey[i] = j
+                goingUpJava[i].pop(j, None)
+            else:
+                goingUpJava[i][j] = goingUpJava[i][j] - 1
+
+    for i in popKey:
+        goingUpJava[i].pop(j, None)
+
+    popKey = {}
+    for i in goingUpData:
+        for j in goingUpData[i]:
+            if (goingUpData[i][j] <= 0):
+                popKey[i] = j
+                goingUpData[i].pop(j, None)
+            else:
+                goingUpData[i][j] = goingUpData[i][j] - 1
+
+
+    for i in popKey:
+        goingUpData[i].pop(j, None)
+
+    popKey = {}
+    for i in goingDownJava:
+        for j in goingDownJava[i]:
+            if (goingDownJava[i][j] <= 0):
+                popKey[i] = j
+                goingDownJava[i].pop(j, None)
+            else:
+                goingDownJava[i][j] = goingDownJava[i][j] - 1
+
+    for i in popKey:
+        goingDownJava[i].pop(j, None)
+
+    popKey = {}
+    for i in goingDownData:
+        for j in goingDownData[i]:
+            if (goingDownData[i][j] <= 0):
+                popKey[i] = j
+                goingDownData[i].pop(j, None)
+            else:
+                goingDownData[i][j] = goingDownData[i][j] - 1
+
+    for i in popKey:
+        goingDownData[i].pop(j, None)
+
 #    turn = getTurnNo(payout)
 #    print "CURRENT TURN IS: " + str(turn)
 
-#    print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+    #print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
 
 
@@ -410,8 +488,8 @@ def init():
 #    print json.dumps(getJavaCapacity(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
-    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
-    r = requests.post(url, data=json.dumps(data), headers=headers)
+    #data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
+    #r = requests.post(url, data=json.dumps(data), headers=headers)
 
 def main():
     global highTurn
@@ -432,6 +510,7 @@ def main():
         clearCR()
         highTurn = getTurnNo(payout)
         turn = getTurnNo(payout)
+        tickDown()
         print ""
         print "CURRENT TURN IS: " + str(turn)
         print "TIME IS: " + getTransactionTime(payout)
@@ -439,6 +518,9 @@ def main():
         printWebTransactions(payout)
         print ""
 
+        print "# of AP Servers: " + str(getWebNodeCount(payout, 'AP'))
+        print "# of EU Servers: " + str(getWebNodeCount(payout, 'EU'))
+        print "# of NA Servers: " + str(getWebNodeCount(payout, 'NA'))
         print "Money earned so far: " + str(getProfitAccumulated(payout))
         print "Money earned this turn: " + str(getProfitEarned(payout))
         print ""
@@ -469,22 +551,29 @@ def main():
         calcChange('EU')
         calcChange('NA')
         print ""
-
+        
+        if(turn > 8 and (webLogic(payout, 'AP') == 1 or webLogic(payout, 'EU') == 1 or webLogic(payout, 'NA') == 1)):
+            data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
+            r = requests.post(url, data=json.dumps(data), headers=headers)
+        
+        print goingUpWeb['AP']
+        print goingUpWeb['EU']
+        print goingUpWeb['NA']
         #plots (turn, profit) as scatter plot
 #        plt.axis([0,turn+10,0,3000])
 #        Profit = getProfitEarned(payout)
 #        plt.scatter(turn, Profit, color='green')
 
 
-        plt.axis([0,turn+10,0,500])
-        TransNA = getWebTransactions(payout, 'NA')
-        TransEU = getWebTransactions(payout, 'EU')
-        TransAP = getWebTransactions(payout, 'AP')
+        #plt.axis([0,turn+10,0,500])
+        #TransNA = getWebTransactions(payout, 'NA')
+        #TransEU = getWebTransactions(payout, 'EU')
+        #TransAP = getWebTransactions(payout, 'AP')
 
 
-        plt.scatter(turn, TransNA, color='red')
-        plt.scatter(turn, TransEU, color='blue')
-        plt.scatter(turn, TransAP, color='orange')
+        #plt.scatter(turn, TransNA, color='red')
+        #plt.scatter(turn, TransEU, color='blue')
+        #plt.scatter(turn, TransAP, color='orange')
         
         #this is for live plotting only
 #        plt.pause(0.00000000000000000000000000000000000000000001)
@@ -496,8 +585,9 @@ def main():
 #        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
         r = nextTurn()
-#        if(turn > 2400):
-#            plt.show()
         raw_input("Press Enter to continue...")
+        if(turn > 1440):
+#            plt.show()
+            raw_input("Press Enter to continue...")
 
 main()
