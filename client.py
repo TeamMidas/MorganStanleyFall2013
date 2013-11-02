@@ -34,7 +34,7 @@ highTurn = 0
 difAP = 0
 difNA = 0
 difEU = 0
-
+CR = {}
 trend = 0
 
 goingUpWeb = {'AP': {}, 'EU': {}, 'NA': {}}
@@ -59,7 +59,7 @@ class AutoVivification(dict):
             value = self[item] = type(self)()
             return value
 
-CR = AutoVivification()
+#CR = AutoVivification()
 
 #JSON parsing functions
 def getCostIncured(payout):
@@ -158,6 +158,16 @@ def printWebTransactions(payout):
     print "North America: " + str(NA)
 
 def setNodes(tier, region, count):
+    global CR
+    #CR['Servers'][tier]['ServerRegions'][region]['NodeCount'] = count
+    if(len(CR) == 0):
+        CR['Servers'] = {}
+    if tier not in CR['Servers']:
+        CR['Servers'][tier] = {}
+    if(len(CR['Servers'][tier]) == 0):
+        CR['Servers'][tier]['ServerRegions'] = {}
+    if region not in CR['Servers'][tier]['ServerRegions']:
+        CR['Servers'][tier]['ServerRegions'][region] = {}
     CR['Servers'][tier]['ServerRegions'][region]['NodeCount'] = count
 
 """
@@ -174,6 +184,7 @@ def upgrades(infrastructure, research):
     CR['Servers']['UpgradeToResearch'] = research
 
 def clearCR():
+    global CR
     CR = {}
 
 def addHistory(region, num):
@@ -353,52 +364,31 @@ def webLogic(payout, region):
 
     online = getWebNodeCount(payout, region)
     serverValue = int(180 * 1.2)
-    print "WUT: " + str(serverValue)
     capacity = online * serverValue
-    print "CAPACITY: " + str(capacity)
-    change = (capacity - expected)
+    difference = expected - capacity
     needed = 0
 
-    print "CHANGE: " + str(change) + " CAPACITY: " + str(capacity)
+    print "REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
     print ""
-    if(abs(change) < serverValue):
-#        setNode('WEB', region, 0)
-        return 0
-    if(abs(change) > serverValue and abs(trend) > 1):
-        if (change > 0 and trend > 0):
-            print "ADDED ONE"
-            setNodes('WEB', region, 1)
-            goingUpWeb[region][upID] = 2
-            upID = upID+1
+    if(difference > serverValue):
+        needed = int(difference / serverValue) - (len(goingUpWeb[region]))
+        if(needed > 0):
+            print "ADDED: " + str(needed)
+            setNodes('WEB', region, needed)
+            while(needed > 0):
+                goingUpWeb[region][upID] = 2
+                upID = upID+1
+                needed = needed-1
             return 1
-        elif(change < 0 and trend < 0 and online > 1):
-            print "REMOVED ONE"
-            setNodes('WEB', region, -1)
+    elif(difference < serverValue):
+        needed = int(difference / serverValue)
+        if(online + needed <= 1):
+             needed = needed+1
+        if(needed < 0):
+
+            print "REMOVED: " + str(needed)
+            setNodes('WEB', region, needed)
             return 1
-    if(abs(change) >= (1.5 * serverValue)):
-        if(change > 0):
-            needed = int(math.ceil( float(change) / serverValue)) - (len(goingUpWeb[region] )* 180)
-            print "ADDED THIS MANY: " + str(needed)
-            if (needed > 0):
-                i = needed
-                while(i > 0):
-                    goingUpWeb[region][upID] = 2
-                    i=i-1
-                    upID= upID+1
-                setNodes('WEB', region, needed)
-                print "ACTUALLY RAN"
-                return 1
-            else:
-                return 0
-        elif(change < 0):
-            needed = int(round(float(change) / serverValue)) - (len(goingUpWeb[region] )* 180)
-            print "REMOVED THIS MANY: " + str(needed)
-            if(needed - online > 1):
-                print "ACTUALLY RAN"
-                setNodes('WEB', region, needed)
-                return 1
-            else:
-                return 0
     return 0
 
     #lagrange save for maybe later use
@@ -496,6 +486,7 @@ def main():
     global difAP
     global difEU
     global difNA
+    global CR
     avgAP = 0.0
     avgEU = 0.0
     avgNA = 0.0
@@ -552,13 +543,18 @@ def main():
         calcChange('NA')
         print ""
         
-        if(turn > 8 and (webLogic(payout, 'AP') == 1 or webLogic(payout, 'EU') == 1 or webLogic(payout, 'NA') == 1)):
-            data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
-            r = requests.post(url, data=json.dumps(data), headers=headers)
+        if(turn > 6):
+            z = webLogic(payout, 'AP') 
+            z = z + webLogic(payout, 'EU')
+            z = z + webLogic(payout, 'NA')
+            if(z > 0):
+                data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
+                print data
+                r = requests.post(url, data=json.dumps(data), headers=headers)
         
-        print goingUpWeb['AP']
-        print goingUpWeb['EU']
-        print goingUpWeb['NA']
+        print "ASIA WEB SERVERS: " + str(goingUpWeb['AP'])
+        print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
+        print "AMERICA WEB SERVERS: " + str(goingUpWeb['NA'])
         #plots (turn, profit) as scatter plot
 #        plt.axis([0,turn+10,0,3000])
 #        Profit = getProfitEarned(payout)
@@ -586,8 +582,8 @@ def main():
 
         r = nextTurn()
         raw_input("Press Enter to continue...")
-        if(turn > 1440):
+        #if(turn > 505):
 #            plt.show()
-            raw_input("Press Enter to continue...")
+           # raw_input("Press Enter to continue...")
 
 main()
