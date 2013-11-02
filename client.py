@@ -107,11 +107,14 @@ def main():
         payout = r.json()
 
         turn = getTurnNo(payout)
-        print "CURRENT TURN IS: " + str(turn)
 
+        print ""
+        print "CURRENT TURN IS: " + str(turn)
 #    print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
         sumWebTransactions(payout)
+        print ""
         r = nextTurn()
+        raw_input("Press Enter to continue...")
 
 
 main()
