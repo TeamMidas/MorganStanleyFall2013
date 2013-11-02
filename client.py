@@ -352,7 +352,7 @@ def webLogic(payout, region):
         expected = pNA
 
     online = getWebNodeCount(payout, region)
-    serverValue = int(40 * 0.5)
+    serverValue = 40
     capacity = online * serverValue
     difference = expected - capacity
     needed = 0
@@ -378,6 +378,50 @@ def webLogic(payout, region):
             setNodes('WEB', region, needed)
             return 1
     return 0
+
+def javaLogic(payout, region):
+    global upID
+    global downID
+    expected = 0
+    if(region == 'AP'):
+        expected = pAP
+    elif(region == 'EU'):
+        expected = pEU
+    else:
+        expected = pNA
+
+    online = getJavaNodeCount(payout, region)
+    serverValue = 100
+    capacity = online * serverValue
+    difference = expected - capacity
+    needed = 0
+
+    print "WHEEE JAVA REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
+    print ""
+    if(difference > serverValue):
+        needed = int(difference / serverValue) - (len(goingUpJava[region]))
+        if(needed > 0):
+            print "ADDED: " + str(needed)
+            setNodes('JAVA', region, needed)
+            while(needed > 0):
+                goingUpJava[region][upID] = 4
+                upID = upID+1
+                needed = needed-1
+            return 1
+    elif(difference < serverValue):
+        needed = int(difference / serverValue) - (len(goingDownJava[region]))
+        if(online + needed <= 1):
+             return 0
+        if(needed < 0):
+            print "REMOVED: " + str(needed)
+            while(needed < 0):
+                goingDownJava[region][upID] = 1
+                downID = downID+1
+                needed = needed+1
+            setNodes('JAVA', region, needed)
+            return 1
+    return 0
+
 
     #lagrange save for maybe later use
 #    p = (temp[0] * 8) + (temp[1] * -15) + (temp[2] * 16) + (temp[3] * -6) + (temp[4] * 2)
@@ -411,7 +455,6 @@ def tickDown():
         for j in goingUpJava[i]:
             if (goingUpJava[i][j] <= 0):
                 popKey[i] = j
-                goingUpJava[i].pop(j, None)
             else:
                 goingUpJava[i][j] = goingUpJava[i][j] - 1
 
@@ -423,7 +466,6 @@ def tickDown():
         for j in goingUpData[i]:
             if (goingUpData[i][j] <= 0):
                 popKey[i] = j
-                goingUpData[i].pop(j, None)
             else:
                 goingUpData[i][j] = goingUpData[i][j] - 1
 
@@ -436,7 +478,6 @@ def tickDown():
         for j in goingDownJava[i]:
             if (goingDownJava[i][j] <= 0):
                 popKey[i] = j
-                goingDownJava[i].pop(j, None)
             else:
                 goingDownJava[i][j] = goingDownJava[i][j] - 1
 
@@ -448,7 +489,6 @@ def tickDown():
         for j in goingDownData[i]:
             if (goingDownData[i][j] <= 0):
                 popKey[i] = j
-                goingDownData[i].pop(j, None)
             else:
                 goingDownData[i][j] = goingDownData[i][j] - 1
 
@@ -504,9 +544,13 @@ def main():
         printWebTransactions(payout)
         print ""
 
-        print "# of AP Servers: " + str(getWebNodeCount(payout, 'AP'))
-        print "# of EU Servers: " + str(getWebNodeCount(payout, 'EU'))
-        print "# of NA Servers: " + str(getWebNodeCount(payout, 'NA'))
+        print "# of AP WEB Servers: " + str(getWebNodeCount(payout, 'AP'))
+        print "# of EU WEB Servers: " + str(getWebNodeCount(payout, 'EU'))
+        print "# of NA WEB Servers: " + str(getWebNodeCount(payout, 'NA'))
+        print "# of AP JAVA Servers: " + str(getJavaNodeCount(payout, 'AP'))
+        print "# of EU JAVA Servers: " + str(getJavaNodeCount(payout, 'EU'))
+        print "# of NA JAVA Servers: " + str(getJavaNodeCount(payout, 'NA'))
+        print ""
         print "Money earned so far: " + str(getProfitAccumulated(payout))
         print "Money earned this turn: " + str(getProfitEarned(payout))
         print ""
@@ -521,13 +565,13 @@ def main():
             avgAP = (((avgAP * (turn - 11)) + abs(hAP[4] - pAP)) / (turn - 10))
             avgEU = (((avgEU * (turn - 11)) + abs(hEU[4] - pEU)) / (turn - 10))
             avgNA = (((avgNA * (turn - 11)) + abs(hNA[4] - pNA)) / (turn - 10))
-            print "Average Mistake ASIA: " + str(avgAP)
-            print "Average Mistake EUROPE: " + str(avgEU)
-            print "Average Mistake AMERICA: " + str(avgNA)
-            print ""
-            print "Highest mistake ASIA: " + str(difAP)
-            print "Highest mistake EUROPE: " + str(difEU)
-            print "Highest mistake AMERICA: " + str(difNA)
+            #print "Average Mistake ASIA: " + str(avgAP)
+            #print "Average Mistake EUROPE: " + str(avgEU)
+            #print "Average Mistake AMERICA: " + str(avgNA)
+            #print ""
+            #print "Highest mistake ASIA: " + str(difAP)
+            #print "Highest mistake EUROPE: " + str(difEU)
+            #print "Highest mistake AMERICA: " + str(difNA)
 
         print ""
 #        print "HISTORY OF ASIA: " + str(hAP)
@@ -542,6 +586,9 @@ def main():
             z = webLogic(payout, 'AP') 
             z = z + webLogic(payout, 'EU')
             z = z + webLogic(payout, 'NA')
+            z = z + javaLogic(payout, 'AP')
+            z = z + javaLogic(payout, 'EU')
+            z = z + javaLogic(payout, 'NA')
             if(z > 0):
                 data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
                 print data
@@ -552,7 +599,7 @@ def main():
         print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
         print "AMERICA WEB SERVERS: " + str(goingUpWeb['NA'])
         r = nextTurn()
-        if(turn > 0):
+        if(turn > 1000):
             raw_input("Press Enter to continue...")
             #plt.show()
         #plots (turn, profit) as scatter plot
