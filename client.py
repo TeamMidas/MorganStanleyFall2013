@@ -34,6 +34,20 @@ highTurn = 0
 difAP = 0
 difNA = 0
 difEU = 0
+
+trend = 0
+
+goingUpWeb = {'AU': {}, 'EU': {}, 'NA': {}}
+goingUpJava = {'AU': {}, 'EU': {}, 'NA': {}}
+goingUpData = {'AU': {}, 'EU': {}, 'NA': {}}
+
+goingDownJava = {'AU': {}, 'EU': {}, 'NA': {}}
+goingDownData = {'AU': {}, 'EU': {}, 'NA': {}}
+
+
+downID = 1
+upID = 1
+
 fig = plt.figure()
 plt.axis([0,10,0,3000])
 #plt.axis([0,10000,0,10000])
@@ -230,6 +244,7 @@ def calcChange(region):
         print "PREDICTED FOR AMERICA IS: " + str(p)
 
 def calcNext(history, dx, dx2):
+    global trend
     current = history[4]
     trend = findTrend(history)
     ans = 0
@@ -317,6 +332,50 @@ def spikeDetection(a, region):
         return i
     else:
         return 0
+
+def webLogic(payout, region):
+    expected = 0
+    if(region == 'AP'):
+        expected = pAP
+    elif(region == 'EU'):
+        expected = pEU
+    else:
+        expected = pNA
+
+    online = getWebNodeCount(payout, region)
+
+    serverValue = int(180 * 1.2)
+    capacity = online * serverValue
+    change = capacity - expected
+
+    if(abs(change) < (serverValue / 2)):
+#        setNode('WEB', region, 0)
+        return 0
+    if(abs(change) < serverValue and abs(trend) > 1):
+        if (change > 0 and trend > 0):
+            setNode('WEB', region, 1)
+            goingUpWeb[region][upID] = 2
+            upID = upID+1
+            return 1
+        elif(change < 0 and trend < 0 and online > 1):
+            setNode('WEB', region, -1)
+            return 1
+    if(abs(change) >= (1.5 * serverValue) and abs(trend) > 2):
+        if(change > 0 and trend >= 2):
+            needed = int(math.ceil( float(change) / serverValue)) - len(goingUpWeb[region])
+            if (needed > 0):
+                setNode('WEB', region, needed)
+                return 1
+            else:
+                return 0
+        elif(change < 0 and trend >= 2):
+            needed = int(round(float(change) / serverValue))
+            if(needed - online > 1):
+                setNode('WEB', region, needed)
+                return 1
+            else:
+                return 0
+    return 0
 
     #lagrange save for maybe later use
 #    p = (temp[0] * 8) + (temp[1] * -15) + (temp[2] * 16) + (temp[3] * -6) + (temp[4] * 2)
