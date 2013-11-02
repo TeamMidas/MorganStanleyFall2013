@@ -36,6 +36,8 @@ difNA = 0
 difEU = 0
 CR = {}
 trend = 0
+preferredR = 'EU'
+migration = 0
 
 goingUpWeb = {'AP': {}, 'EU': {}, 'NA': {}}
 goingUpJava = {'AP': {}, 'EU': {}, 'NA': {}}
@@ -424,17 +426,27 @@ def javaLogic(payout, region):
             return 1
     return 0
 
-def dataLogic(payout, region):
+def dataLogic(payout):
     global upID
     global downID
+    global preferredR
+    global migration
     expected = 0
-    #if(region == 'AP'):
-    #    expected = pAP
-    #elif(region == 'EU'):
-    #    expected = pEU
-    #else:
-    #    expected = pNA
+    if(getDBNodeCount(payout,'NA') > getDBNodeCount(payout, 'EU')):
+        oldregion = 'NA'
+    else:
+        oldregion = 'EU'
+    
+    if(pNA > 1500 and hNA[4] > 1200)
+        preferredR = 'NA'
+    elif((pEU > 1500 and hEU[4] > 1200) or (pAU > 1650 and hAU[4] > 1350)):
+        preferredR = 'EU'
 
+    if(preferredR != oldregion):
+        getDBNodeCount(payout, oldregion)
+        region = preferredR
+
+    region = preferredRegion
     expected = pAP + pEU + pNA
     online = getDBNodeCount(payout, region)
     serverValue = 350
@@ -567,6 +579,7 @@ def main():
     init()
     r = nextTurn()
     wtf = 1
+    lol = 1231241
 #    while(1):
 #        r = nextTurn()
 #        payout = r.json()
@@ -590,27 +603,27 @@ def main():
         printWebTransactions(payout)
         print ""
 
-        print "# of AP WEB Servers: " + str(getWebNodeCount(payout, 'AP'))
-        print "# of EU WEB Servers: " + str(getWebNodeCount(payout, 'EU'))
-        print "# of NA WEB Servers: " + str(getWebNodeCount(payout, 'NA'))
-        print "# of AP JAVA Servers: " + str(getJavaNodeCount(payout, 'AP'))
-        print "# of EU JAVA Servers: " + str(getJavaNodeCount(payout, 'EU'))
-        print "# of NA JAVA Servers: " + str(getJavaNodeCount(payout, 'NA'))
-        print ""
-        print "Money earned so far: " + str(getProfitAccumulated(payout))
-        print "Money earned this turn: " + str(getProfitEarned(payout))
-        print ""
+        #print "# of AP WEB Servers: " + str(getWebNodeCount(payout, 'AP'))
+        #print "# of EU WEB Servers: " + str(getWebNodeCount(payout, 'EU'))
+        #print "# of NA WEB Servers: " + str(getWebNodeCount(payout, 'NA'))
+        #print "# of AP JAVA Servers: " + str(getJavaNodeCount(payout, 'AP'))
+        #print "# of EU JAVA Servers: " + str(getJavaNodeCount(payout, 'EU'))
+        #print "# of NA JAVA Servers: " + str(getJavaNodeCount(payout, 'NA'))
+        #print ""
+        #print "Money earned so far: " + str(getProfitAccumulated(payout))
+        #print "Money earned this turn: " + str(getProfitEarned(payout))
+        #print ""
 
-        if(turn > 10):
-            if(difAP < abs(hAP[4]-pAP)):
-                difAP = abs(hAP[4] - pAP)
-            if(difEU < abs(hEU[4] - pEU)):
-                difEU = abs(hEU[4]-pEU)
-            if(difNA < abs(hNA[4] - pNA)):
-                difNA = abs(hNA[4] - pNA)
-            avgAP = (((avgAP * (turn - 11)) + abs(hAP[4] - pAP)) / (turn - 10))
-            avgEU = (((avgEU * (turn - 11)) + abs(hEU[4] - pEU)) / (turn - 10))
-            avgNA = (((avgNA * (turn - 11)) + abs(hNA[4] - pNA)) / (turn - 10))
+        #if(turn > 10):
+        #    if(difAP < abs(hAP[4]-pAP)):
+        #        difAP = abs(hAP[4] - pAP)
+        #    if(difEU < abs(hEU[4] - pEU)):
+        #        difEU = abs(hEU[4]-pEU)
+        #    if(difNA < abs(hNA[4] - pNA)):
+        #        difNA = abs(hNA[4] - pNA)
+        #    avgAP = (((avgAP * (turn - 11)) + abs(hAP[4] - pAP)) / (turn - 10))
+        #    avgEU = (((avgEU * (turn - 11)) + abs(hEU[4] - pEU)) / (turn - 10))
+        #    avgNA = (((avgNA * (turn - 11)) + abs(hNA[4] - pNA)) / (turn - 10))
 
         #if(getProfitAccumulated(payout) > 300000):
          #   upgradesInfrastructure('GRID')
@@ -638,12 +651,13 @@ def main():
             z = z + javaLogic(payout, 'AP')
             z = z + javaLogic(payout, 'EU')
             z = z + javaLogic(payout, 'NA')
-            z = z + dataLogic(payout, 'EU')
+            z = z + dataLogic(payout)
             if(z > 0):
-                if(wtf == 1):
+                if(wtf == 1 and getProfitAccumulated(payout) >= 336000):
                     upgradesResearch("Grid")
+                    #lol = turn
                     wtf = 0
-                    raw_input("WTF IT RAN")
+                    #raw_input("WTF IT RAN")
                 data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
                 print data
                 r = requests.post(url, data=json.dumps(data), headers=headers)
@@ -655,20 +669,21 @@ def main():
 #        print "ASIA WEB SERVERS: " + str(goingUpWeb['AP'])
 #        print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
 #        print "AMERICA WEB SERVERS: " + str(goingUpWeb['NA'])
-        print "ASIA JAVA SERVERS: " + str(goingUpJava['AP'])
-        print "EUROPE JAVA SERVERS: " + str(goingUpJava['EU'])
-        print "AMERICA JAVA SERVERS: " + str(goingUpJava['NA'])
-        print "ASIA JAVA SERVERS DOWN: " + str(goingDownJava['AP'])
-        print "EUROPE JAVA SERVERS DOWN: " + str(goingDownJava['EU'])
-        print "AMERICA JAVA SERVERS DOWN: " + str(goingDownJava['NA'])
+        #print "ASIA JAVA SERVERS: " + str(goingUpJava['AP'])
+        #print "EUROPE JAVA SERVERS: " + str(goingUpJava['EU'])
+        #print "AMERICA JAVA SERVERS: " + str(goingUpJava['NA'])
+        #print "ASIA JAVA SERVERS DOWN: " + str(goingDownJava['AP'])
+        #print "EUROPE JAVA SERVERS DOWN: " + str(goingDownJava['EU'])
+        #print "AMERICA JAVA SERVERS DOWN: " + str(goingDownJava['NA'])
         print ""
-        print(getServerCost(payout))
-        print 'RESEARCH: ' + json.dumps(getResearchUpgradeState(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-        r = nextTurn()
+        #print(getServerCost(payout))
+        #print 'RESEARCH: ' + json.dumps(getResearchUpgradeState(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+        r = nextTurn() #ALWAYS KEEP
 #        print r.text
-        raw_input("Press enter")
-        #if(turn > 50):
-         #   raw_input("Press Enter to continue...")
+        print "CURRENT TURN IS: " + str(turn)
+        #raw_input("Press enter")
+        if(turn > lol):
+            raw_input("Press Enter to continue...")
             #plt.show()
         #plots (turn, profit) as scatter plot
 #        plt.axis([0,turn+10,0,3000])
