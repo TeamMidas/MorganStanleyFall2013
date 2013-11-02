@@ -435,7 +435,7 @@ def dataLogic(payout, region):
 
     expected = pAP + pEU + pNA
     online = getDBNodeCount(payout, region)
-    serverValue = 250
+    serverValue = 350
     capacity = online * serverValue
     difference = expected - capacity
     needed = 0
@@ -455,7 +455,7 @@ def dataLogic(payout, region):
     elif(difference < serverValue):
         needed = int(difference / serverValue) - (len(goingDownData[region]))
         if(online + needed <= 1):
-             needed = needed+1
+            return 0
         if(needed < 0):
             print "REMOVED: " + str(needed)
             while(needed < 0):
