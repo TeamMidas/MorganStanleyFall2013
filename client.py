@@ -298,7 +298,7 @@ def init():
 
 #    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    print json.dumps(getResearchUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
     r = requests.post(url, data=json.dumps(data), headers=headers)
@@ -326,6 +326,9 @@ def main():
         print getTransactionTime(payout)
         printWebTransactions(payout)
         print ""
+
+        print "Money earned so far: " + json.dumps(getProfitAccumulated(payout), sort_keys=True, indent=4, separators=(',', ': '))
+        print "Money earned this turn: " + json.dumps(getProfitEarned(payout), sort_keys=True, indent=4, separators=(',', ': '))
         
         if(turn > 10):
             if(difAP < abs(hAP[4]-pAP)):
