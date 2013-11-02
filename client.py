@@ -22,7 +22,6 @@ import requests
 
 url = 'http://hermes.wha.la/api/hermes'
 token = 'f6ead613-de05-4a51-bda4-76ae2448c1b8'
-<<<<<<< HEAD
 
 def main():
     data = {'Command': 'INIT', 'Token': token}
