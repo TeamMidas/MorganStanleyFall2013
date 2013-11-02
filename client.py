@@ -66,17 +66,26 @@ def getWebServers(payout):
 def getWebRegions(payout):
     return getWebServers(payout)['ServerRegions']
 
+def getWebNodeCount(payout, region):
+    return getWebRegions(payout)[region]['NodeCount']
+
 def getJavaServers(payout):
     return getServerTiers(payout)['JAVA']
 
 def getJavaRegions(payout):
     return getJavaServers(payout)['ServerRegions']
 
+def getJavaNodeCount(payout, region):
+    return getJavaRegions(payout)[region]['NodeCount']
+
 def getDBServers(payout):
     return getServerTiers(payout)['DB']
 
 def getDBRegions(payout):
     return getDBServers(payout)['ServerRegions']
+
+def getDBNodeCount(payout, region):
+    return getDBRegions(payout)[region]['NodeCount']
 
 def getTurnNo(payout):
     return payout['ServerState']['TurnNo']
@@ -93,6 +102,10 @@ def sumWebTransactions(payout):
     NA = getWebTransactions(payout, 'NA')
     return AP + EU + NA
 
+#    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
+def setWebNodes():
+    return "'ChangeRequest' : {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}";
+
 
 
 def main():
@@ -104,6 +117,12 @@ def main():
 #turn 1
     data = {'Command': 'PLAY', 'Token': token}
     r = requests.post(url, data=json.dumps(data), headers=headers)
+    payout = r.json()
+
+    turn = getTurnNo(payout)
+    print "CURRENT TURN IS: " + str(turn)
+
+    print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
 #turn 2
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
@@ -116,12 +135,8 @@ def main():
     turn = getTurnNo(payout)
     print "CURRENT TURN IS: " + str(turn)
 
-    print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
+    print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
-#    print json.dumps(sumWebServers(payout), sort_keys=True, indent=4, separators=(',', ': '))
-
+#    print json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
 main()
-
-#data = {'Command': 'PLAY', 'Token': 'f6ead613-de05-4a51-bda4-76ae2448c1b8'}
-#r = requests.post(url, data=json.dumps(data), headers=headers)
