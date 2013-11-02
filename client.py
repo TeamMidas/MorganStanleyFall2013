@@ -422,6 +422,49 @@ def javaLogic(payout, region):
             return 1
     return 0
 
+def dataLogic(payout, region):
+    global upID
+    global downID
+    expected = 0
+    #if(region == 'AP'):
+    #    expected = pAP
+    #elif(region == 'EU'):
+    #    expected = pEU
+    #else:
+    #    expected = pNA
+
+    expected = pAP + pEU + pNA
+    online = getDBNodeCount(payout, region)
+    serverValue = 250
+    capacity = online * serverValue
+    difference = expected - capacity
+    needed = 0
+
+    print "WHEEE DATA REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
+    print ""
+    if(difference > serverValue):
+        needed = int(difference / serverValue) - (len(goingUpData[region]))
+        if(needed > 0):
+            print "ADDED: " + str(needed)
+            setNodes('DB', region, needed)
+            while(needed > 0):
+                goingUpData[region][upID] = 8
+                upID = upID+1
+                needed = needed-1
+            return 1
+    elif(difference < serverValue):
+        needed = int(difference / serverValue) - (len(goingDownData[region]))
+        if(online + needed <= 1):
+             needed = needed+1
+        if(needed < 0):
+            print "REMOVED: " + str(needed)
+            while(needed < 0):
+                setNodes('DB', region, needed)
+                goingDownData[region][upID] = 2
+                downID = downID+1
+                needed = needed+1
+            return 1
+    return 0
 
     #lagrange save for maybe later use
 #    p = (temp[0] * 8) + (temp[1] * -15) + (temp[2] * 16) + (temp[3] * -6) + (temp[4] * 2)
@@ -589,6 +632,7 @@ def main():
             z = z + javaLogic(payout, 'AP')
             z = z + javaLogic(payout, 'EU')
             z = z + javaLogic(payout, 'NA')
+            z = z + dataLogic(payout, 'EU')
             if(z > 0):
                 data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
                 print data
