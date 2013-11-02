@@ -400,7 +400,7 @@ def main():
         #plots (turn, profit) as scatter plot
         plt.axis([0,turn+10,0,3000])
         plt.scatter(turn, getProfitEarned(payout))
-        plt.pause(0.001)
+        plt.pause(0.00000000000000000000000000000000000000000001)
         plt.draw()
 
 #        print 'DB NODES IN NA: ' + json.dumps(getDBNodeCount(payout, 'NA'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
