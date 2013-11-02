@@ -403,9 +403,22 @@ def main():
         print ""
 
         #plots (turn, profit) as scatter plot
-        plt.axis([0,turn+10,0,3000])
-        #red is Profit Earned this turn
-        plt.scatter(turn, getProfitEarned(payout), color='green')
+#        plt.axis([0,turn+10,0,3000])
+#        Profit = getProfitEarned(payout)
+#        plt.scatter(turn, Profit, color='green')
+
+
+        plt.axis([0,turn+10,0,500])
+        TransNA = getWebTransactions(payout, 'NA')
+        TransEU = getWebTransactions(payout, 'EU')
+        TransAP = getWebTransactions(payout, 'AP')
+
+
+        plt.scatter(turn, TransNA, color='red')
+        plt.scatter(turn, TransEU, color='blue')
+        plt.scatter(turn, TransAP, color='orange')
+        
+
         plt.pause(0.00000000000000000000000000000000000000000001)
         plt.draw()
 
