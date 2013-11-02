@@ -190,16 +190,23 @@ def nextTurn():
 def init():
     data = {'Command': 'INIT', 'Token': token}
     r = requests.post(url, data=json.dumps(data), headers=headers)
-#    payout = r.json()
+    payout = r.json()
 
 #    turn = getTurnNo(payout)
 #    print "CURRENT TURN IS: " + str(turn)
 
 #    print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
+
+
+#    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#    print json.dumps(getResearchUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#    print json.dumps(getServerCost(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+
     setNodes('WEB', 'EU', -1)
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
     r = requests.post(url, data=json.dumps(data), headers=headers)
+
 
 
 def main():
@@ -211,7 +218,6 @@ def main():
         clearCR()
 
         turn = getTurnNo(payout)
-
         print ""
         print "CURRENT TURN IS: " + str(turn)
 
