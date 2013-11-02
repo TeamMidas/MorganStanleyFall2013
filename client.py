@@ -19,6 +19,7 @@ import json, urllib, urllib2
 import math
 import operator
 import requests
+from pylab import *
 
 url = 'http://hermes.wha.la/api/hermes'
 token = 'f6ead613-de05-4a51-bda4-76ae2448c1b8'
@@ -33,6 +34,9 @@ highTurn = 0
 difAP = 0
 difNA = 0
 difEU = 0
+fig = plt.figure()
+plt.axis([0,10,0,3000])
+#plt.axis([0,10000,0,10000])
 
 class AutoVivification(dict):
     """Implementation of perl's autovivification feature."""
@@ -392,7 +396,12 @@ def main():
         calcChange('EU')
         calcChange('NA')
         print ""
-        print getProfitAccumulated(payout)
+
+        #plots (turn, profit) as scatter plot
+        plt.axis([0,turn+10,0,3000])
+        plt.scatter(turn, getProfitEarned(payout))
+        plt.pause(0.001)
+        plt.draw()
 
 #        print 'DB NODES IN NA: ' + json.dumps(getDBNodeCount(payout, 'NA'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #        print 'DB NODES IN EU: ' + json.dumps(getDBNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
