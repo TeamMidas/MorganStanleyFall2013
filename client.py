@@ -108,6 +108,9 @@ def getJavaRegions(payout):
 def getJavaNodeCount(payout, region):
     return getJavaRegions(payout)[region]['NodeCount']
 
+def getJavaCapacity(payout):
+    return getJavaServers(payout)['ServerPerformance']['CapactityLevels'][0]['UpperLimit']
+
 def getDBServers(payout):
     return getServerTiers(payout)['DB']
 
@@ -116,6 +119,9 @@ def getDBRegions(payout):
 
 def getDBNodeCount(payout, region):
     return getDBRegions(payout)[region]['NodeCount']
+
+def getDBCapacity(payout):
+    return getDBServers(payout)['ServerPerformance']['CapactityLevel'][0]['UpperLimit']
 
 def getTurnNo(payout):
     return payout['ServerState']['TurnNo']
@@ -342,7 +348,7 @@ def init():
 
 
 #    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#    print json.dumps(getWebCapacity(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#    print json.dumps(getJavaCapacity(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
