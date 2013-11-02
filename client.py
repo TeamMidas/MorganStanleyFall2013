@@ -30,6 +30,17 @@ hAP = []
 hEU = []
 hNA = []
 
+class AutoVivification(dict):
+    """Implementation of perl's autovivification feature."""
+    def __getitem__(self, item):
+        try:
+            return dict.__getitem__(self, item)
+        except KeyError:
+            value = self[item] = type(self)()
+            return value
+
+CR = AutoVivification()
+
 #JSON parsing functions
 def getCostIncured(payout):
     return payout['ServerState']['CostIncured']
@@ -108,8 +119,11 @@ def printWebTransactions(payout):
     print "Europe: " + str(EU)
     print "North America: " + str(NA)
 
-def setNodes(tier, region, num):
-    return {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {tier: {'ServerRegions': {region: {'NodeCount': num}}}}}}
+def setNodes(tier, region, count):
+    CR['Servers'][tier]['ServerRegions'][region]['NodeCount'] = count
+
+def clearCR():
+    CR = {}
 
 def addHistory(region, num):
     global hAP
@@ -182,10 +196,11 @@ def init():
 #    print "CURRENT TURN IS: " + str(turn)
 
 #    print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-    
 #    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
-    data = setNodes('WEB', 'EU', -1)
+    setNodes('WEB', 'EU', -1)
+    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
     r = requests.post(url, data=json.dumps(data), headers=headers)
+
 
 def main():
     init()
@@ -193,12 +208,12 @@ def main():
 
     while(1):
         payout = r.json()
+        clearCR()
 
         turn = getTurnNo(payout)
 
         print ""
         print "CURRENT TURN IS: " + str(turn)
-#    print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
 
         printWebTransactions(payout)
         print ""
