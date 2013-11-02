@@ -418,10 +418,9 @@ def main():
         plt.scatter(turn, TransEU, color='blue')
         plt.scatter(turn, TransAP, color='orange')
         
-
+        #this is for live plotting only
         plt.pause(0.00000000000000000000000000000000000000000001)
         plt.draw()
-
 
 
 #        print 'DB NODES IN NA: ' + json.dumps(getDBNodeCount(payout, 'NA'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
@@ -429,7 +428,8 @@ def main():
 #        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
         r = nextTurn()
-        #if(turn > 2400):
-        #    raw_input("Press Enter to continue...")
+        if(turn > 10):
+            plt.show()
+            raw_input("Press Enter to continue...")
 
 main()
