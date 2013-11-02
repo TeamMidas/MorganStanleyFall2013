@@ -49,8 +49,6 @@ downID = 1
 upID = 1
 
 fig = plt.figure()
-plt.axis([0,10,0,3000])
-#plt.axis([0,10000,0,10000])
 
 class AutoVivification(dict):
     """Implementation of perl's autovivification feature."""
@@ -112,6 +110,9 @@ def getWebRegions(payout):
 def getWebNodeCount(payout, region):
     return getWebRegions(payout)[region]['NodeCount']
 
+def getWebCapacity(payout):
+    return getWebServers(payout)['ServerPerformance']['CapactityLevels'][0]['UpperLimit']
+
 def getJavaServers(payout):
     return getServerTiers(payout)['JAVA']
 
@@ -121,6 +122,9 @@ def getJavaRegions(payout):
 def getJavaNodeCount(payout, region):
     return getJavaRegions(payout)[region]['NodeCount']
 
+def getJavaCapacity(payout):
+    return getJavaServers(payout)['ServerPerformance']['CapactityLevels'][0]['UpperLimit']
+
 def getDBServers(payout):
     return getServerTiers(payout)['DB']
 
@@ -129,6 +133,9 @@ def getDBRegions(payout):
 
 def getDBNodeCount(payout, region):
     return getDBRegions(payout)[region]['NodeCount']
+
+def getDBCapacity(payout):
+    return getDBServers(payout)['ServerPerformance']['CapactityLevel'][0]['UpperLimit']
 
 def getTurnNo(payout):
     return payout['ServerState']['TurnNo']
@@ -400,7 +407,7 @@ def init():
 
 
 #    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#    print json.dumps(getResearchUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#    print json.dumps(getJavaCapacity(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
@@ -464,17 +471,33 @@ def main():
         print ""
 
         #plots (turn, profit) as scatter plot
-        plt.axis([0,turn+10,0,3000])
-        plt.scatter(turn, getProfitEarned(payout))
-        plt.pause(0.00000000000000000000000000000000000000000001)
-        plt.draw()
+#        plt.axis([0,turn+10,0,3000])
+#        Profit = getProfitEarned(payout)
+#        plt.scatter(turn, Profit, color='green')
+
+
+        plt.axis([0,turn+10,0,500])
+        TransNA = getWebTransactions(payout, 'NA')
+        TransEU = getWebTransactions(payout, 'EU')
+        TransAP = getWebTransactions(payout, 'AP')
+
+
+        plt.scatter(turn, TransNA, color='red')
+        plt.scatter(turn, TransEU, color='blue')
+        plt.scatter(turn, TransAP, color='orange')
+        
+        #this is for live plotting only
+#        plt.pause(0.00000000000000000000000000000000000000000001)
+#        plt.draw()
+
 
 #        print 'DB NODES IN NA: ' + json.dumps(getDBNodeCount(payout, 'NA'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #        print 'DB NODES IN EU: ' + json.dumps(getDBNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
         r = nextTurn()
-        #if(turn > 2400):
-        #    raw_input("Press Enter to continue...")
+#        if(turn > 2400):
+#            plt.show()
+        raw_input("Press Enter to continue...")
 
 main()
