@@ -191,8 +191,20 @@ def calcChange(region):
 
     dx = temp[4] - temp[3]
     dx2 = dx - temp[3] - temp[2]
-
-    p = calcNext(temp, dx, dx2)
+    
+    spike = spikeDetection(temp, region)
+    if(spike > 0):
+        if(spike > 10):
+            p = temp[4]
+        else:
+            #v = 2**spike
+            v = math.log(spike) * 1.5
+            if(temp[4] - temp[3] > 0):
+                p = temp[4] + int((temp[4] - temp[3]) * v)
+            else:
+                p = temp[4] - int(((temp[4] - temp[3]) * -1) * v)
+    else:
+        p = calcNext(temp, dx, dx2)
 
     if(region == 'AP'):
         pAP = p
@@ -268,6 +280,25 @@ def findTrend(a):
     
     return i
     
+def spikeDetection(a, region):
+    temp = 0
+    if(region == 'AP'):
+        temp = pAP
+    elif(region == 'EU'):
+        temp = pEU
+    else:
+        temp = pNA
+
+    if(abs(a[4] - temp) > 300):
+        return a[4]
+
+    i = 1
+    if (abs(a[4] - temp) > 80):
+        while(i < 4 and a[4-i]-a[3-i] > 60):
+            i=i+1
+        return i
+    else:
+        return 0
 
     #lagrange save for maybe later use
 #    p = (temp[0] * 8) + (temp[1] * -15) + (temp[2] * 16) + (temp[3] * -6) + (temp[4] * 2)
