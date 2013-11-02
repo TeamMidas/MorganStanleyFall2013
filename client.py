@@ -159,6 +159,16 @@ def setNodes(tier, region, count):
         CR['Servers'][tier]['ServerRegions'][region] = {}
     CR['Servers'][tier]['ServerRegions'][region]['NodeCount'] = count
 
+def upgradesInfrastructure(infrastructure):
+    if(len(CR) == 0):
+        CR['Servers'] = {}
+    CR['Servers']['UpgradeInfrastructure'] = infrastructure
+
+def upgradesResearch(research):
+    if(len(CR) == 0):
+        CR['Servers'] = {}
+    CR['Servers']['UpgradeToResearch'] = research
+
 """
 This should give upgrades
 To set nodes and do upgrades do:
@@ -167,10 +177,6 @@ To set nodes and do upgrades do:
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
     r = requests.post(url, data=json.dumps(data), headers=headers)
 """
-
-def upgrades(infrastructure, research):
-    CR['Servers']['UpgradeInfrastructure'] = infrastructure
-    CR['Servers']['UpgradeToResearch'] = research
 
 def clearCR():
     global CR
@@ -608,6 +614,9 @@ def main():
             avgAP = (((avgAP * (turn - 11)) + abs(hAP[4] - pAP)) / (turn - 10))
             avgEU = (((avgEU * (turn - 11)) + abs(hEU[4] - pEU)) / (turn - 10))
             avgNA = (((avgNA * (turn - 11)) + abs(hNA[4] - pNA)) / (turn - 10))
+
+        #if(getProfitAccumulated(payout) > 300000):
+         #   upgradesInfrastructure('GRID')
             #print "Average Mistake ASIA: " + str(avgAP)
             #print "Average Mistake EUROPE: " + str(avgEU)
             #print "Average Mistake AMERICA: " + str(avgNA)
@@ -638,6 +647,7 @@ def main():
                 print data
                 r = requests.post(url, data=json.dumps(data), headers=headers)
                 clearCR()
+                print r.text
         
 #        print "ASIA WEB SERVERS: " + str(goingUpWeb['AP'])
 #        print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
@@ -650,7 +660,8 @@ def main():
         print "AMERICA JAVA SERVERS DOWN: " + str(goingDownJava['NA'])
 
         r = nextTurn()
-        if(turn > 1000):
+        print r.text
+        if(turn > 10000):
             raw_input("Press Enter to continue...")
             #plt.show()
         #plots (turn, profit) as scatter plot
