@@ -23,6 +23,12 @@ import requests
 url = 'http://hermes.wha.la/api/hermes'
 token = 'f6ead613-de05-4a51-bda4-76ae2448c1b8'
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+pAP = 0
+pEU = 0
+pNA = 0
+hAP = []
+hEU = []
+hNA = []
 
 #JSON parsing functions
 def getCostIncured(payout):
@@ -102,6 +108,37 @@ def sumWebTransactions(payout):
 def setNodes(tier, region, num):
     return {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {tier: {'ServerRegions': {region: {'NodeCount': num}}}}}}
 
+def addHistory(region, num):
+    global hAP
+    global hEU
+    global hNA
+    temp = []
+
+    if(region == 'AP'):
+        temp = hAP
+    elif(region == 'EU'):
+        temp = hEU
+    else:
+        temp = hNA
+
+    if(len(temp) < 5):
+        temp.append(num)
+    else:
+        temp = temp[1:]
+        temp.append(num)
+
+    if(region == 'AP'):
+        hAP = temp
+    elif(region == 'EU'):
+        hEU = temp
+    else:
+        hNA = temp
+
+"""
+    if (len(temp) < 3):
+        temp.append(num)
+        return 0
+"""
 
 #Control functions
 def nextTurn():
@@ -111,12 +148,12 @@ def nextTurn():
 def init():
     data = {'Command': 'INIT', 'Token': token}
     r = requests.post(url, data=json.dumps(data), headers=headers)
-    payout = r.json()
+#    payout = r.json()
 
-    turn = getTurnNo(payout)
-    print "CURRENT TURN IS: " + str(turn)
+#    turn = getTurnNo(payout)
+#    print "CURRENT TURN IS: " + str(turn)
 
-    print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#    print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
     
 #    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
     data = setNodes('WEB', 'EU', -1)
@@ -129,7 +166,6 @@ def main():
     while(1):
         payout = r.json()
 
-        print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
         turn = getTurnNo(payout)
 
         print ""
