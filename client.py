@@ -52,6 +52,15 @@ def getCostIncured(payout):
 def getServerCost(payout):
     return payout['ServerState']['CostPerServer']
 
+def getProfitConstant(payout):
+    return payout['ServerState']['ProfitConstant']
+
+def getProfitAccumulated(payout):
+    return payout['ServerState']['ProfitAccumulated']
+
+def getProfitEarned(payout):
+    return payout['ServerState']['ProfitEarned']
+
 def getDQTime(payout):
     return payout['ServerState']['DisqualifyTimeInMilliSeconds']
 
@@ -324,9 +333,8 @@ def init():
 
 #    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    print json.dumps(getResearchUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
-    setNodes('WEB', 'EU', -1)
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
     r = requests.post(url, data=json.dumps(data), headers=headers)
 
@@ -354,6 +362,9 @@ def main():
         print getTransactionTime(payout)
         printWebTransactions(payout)
         print ""
+
+        print "Money earned so far: " + json.dumps(getProfitAccumulated(payout), sort_keys=True, indent=4, separators=(',', ': '))
+        print "Money earned this turn: " + json.dumps(getProfitEarned(payout), sort_keys=True, indent=4, separators=(',', ': '))
         
         if(turn > 10):
             if(difAP < abs(hAP[4]-pAP)):
@@ -382,6 +393,10 @@ def main():
         calcChange('NA')
         print ""
         print getProfitAccumulated(payout)
+
+#        print 'DB NODES IN NA: ' + json.dumps(getDBNodeCount(payout, 'NA'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#        print 'DB NODES IN EU: ' + json.dumps(getDBNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
         r = nextTurn()
         if(turn > 2400):
