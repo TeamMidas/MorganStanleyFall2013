@@ -121,6 +121,17 @@ def printWebTransactions(payout):
 
 def setNodes(tier, region, count):
     CR['Servers'][tier]['ServerRegions'][region]['NodeCount'] = count
+"
+This should give upgrades
+To set nodes and do upgrades do:
+    setNodes(tier, region, count)
+    upgrades(infrastructure, research)
+    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
+    r = requests.post(url, data=json.dumps(data), headers=headers)
+"
+def upgrades(infrastructure, research):
+    CR['Servers']['UpgradeInfrastructure'] = infrastructure
+    CR['Servers']['UpgradeToResearch'] = research
 
 def clearCR():
     CR = {}
@@ -201,7 +212,7 @@ def init():
 
 #    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    print json.dumps(getResearchUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#    print json.dumps(getServerCost(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
     setNodes('WEB', 'EU', -1)
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
