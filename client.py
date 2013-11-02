@@ -38,6 +38,7 @@ CR = {}
 trend = 0
 preferredR = 'EU'
 migration = 0
+oldregion = 'EU'
 
 goingUpWeb = {'AP': {}, 'EU': {}, 'NA': {}}
 goingUpJava = {'AP': {}, 'EU': {}, 'NA': {}}
@@ -431,22 +432,32 @@ def dataLogic(payout):
     global downID
     global preferredR
     global migration
+    global oldregion
     expected = 0
-    if(getDBNodeCount(payout,'NA') > getDBNodeCount(payout, 'EU')):
-        oldregion = 'NA'
-    else:
-        oldregion = 'EU'
-    
-    if(pNA > 1500 and hNA[4] > 1200)
+
+    region = preferredR
+
+    if(migration > 0):
+        migration = migration - 1
+        return dataMove(payout)
+
+    if(pNA > 1500 and hNA[4] > 1200):
         preferredR = 'NA'
-    elif((pEU > 1500 and hEU[4] > 1200) or (pAU > 1650 and hAU[4] > 1350)):
+    elif((pEU > 1500 and hEU[4] > 1200 and pNA < 400 and hNA[4] < 600 and hNA[3] < 600 ) or (pAP > 1650 and hAP[4] > 1350 and pEU > 1500 and hEU[4] > 1500 and pNA <800 and hNA[4] <800)):
         preferredR = 'EU'
 
-    if(preferredR != oldregion):
-        getDBNodeCount(payout, oldregion)
-        region = preferredR
+    #start of migration to new main area
+    if(preferredR != region):
+        temp = getDBNodeCount(payout, region)
+        setNodes('DB', preferredR, temp)
+        while(temp > 0):
+            goingUpData[region][upID] = 8
+            upID = upID+1
+            temp = temp-1
+        migration = 10
+        oldregion = region
+        return 1
 
-    region = preferredRegion
     expected = pAP + pEU + pNA
     online = getDBNodeCount(payout, region)
     serverValue = 350
@@ -480,6 +491,18 @@ def dataLogic(payout):
             return 1
     return 0
 
+def dataMove(payout):
+    global downID
+    if(migration == 2):
+        temp = getDBNodeCount(payout, oldregion)
+        while( temp > 0):
+            setNodes('DB', oldregion, temp * -1)
+            goingDownData[oldregion][upID] = 2
+            downID = downID+1
+            temp = temp-1
+            return 1
+    else:
+        return 0
     #lagrange save for maybe later use
 #    p = (temp[0] * 8) + (temp[1] * -15) + (temp[2] * 16) + (temp[3] * -6) + (temp[4] * 2)
     
@@ -677,7 +700,7 @@ def main():
         #print "AMERICA JAVA SERVERS DOWN: " + str(goingDownJava['NA'])
         print ""
         #print(getServerCost(payout))
-        #print 'RESEARCH: ' + json.dumps(getResearchUpgradeState(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+        print 'RESEARCH: ' + json.dumps(getResearchUpgradeState(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
         r = nextTurn() #ALWAYS KEEP
 #        print r.text
         print "CURRENT TURN IS: " + str(turn)
