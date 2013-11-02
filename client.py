@@ -24,6 +24,7 @@ url = 'http://hermes.wha.la/api/hermes'
 token = 'f6ead613-de05-4a51-bda4-76ae2448c1b8'
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 
+#JSON parsing functions
 def getCostIncured(payout):
     return payout['ServerState']['CostIncured']
 
@@ -51,7 +52,6 @@ def getResearchUpgrades(payout):
 def getResearchUpgardeState(payout):
     return payout['ServerState']['ResearchUpgradeState']
 
-############# PROBABLY THE IMPORTANT STUFF ##########################
 def getServerTiers(payout):
     return payout['ServerState']['ServerTiers']
 
@@ -61,17 +61,26 @@ def getWebServers(payout):
 def getWebRegions(payout):
     return getWebServers(payout)['ServerRegions']
 
+def getWebNodeCount(payout, region):
+    return getWebRegions(payout)[region]['NodeCount']
+
 def getJavaServers(payout):
     return getServerTiers(payout)['JAVA']
 
 def getJavaRegions(payout):
     return getJavaServers(payout)['ServerRegions']
 
+def getJavaNodeCount(payout, region):
+    return getJavaRegions(payout)[region]['NodeCount']
+
 def getDBServers(payout):
     return getServerTiers(payout)['DB']
 
 def getDBRegions(payout):
     return getDBServers(payout)['ServerRegions']
+
+def getDBNodeCount(payout, region):
+    return getDBRegions(payout)[region]['NodeCount']
 
 def getTurnNo(payout):
     return payout['ServerState']['TurnNo']
@@ -90,6 +99,11 @@ def sumWebTransactions(payout):
     print "Europe: " + str(EU)
     print "North America: " + str(NA)
 
+def setNodes(tier, region, num):
+    return {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {tier: {'ServerRegions': {region: {'NodeCount': num}}}}}}
+
+
+#Control functions
 def nextTurn():
     data = {'Command': 'PLAY', 'Token': token}
     return requests.post(url, data=json.dumps(data), headers=headers)
@@ -97,28 +111,34 @@ def nextTurn():
 def init():
     data = {'Command': 'INIT', 'Token': token}
     r = requests.post(url, data=json.dumps(data), headers=headers)
+    payout = r.json()
+
+    turn = getTurnNo(payout)
+    print "CURRENT TURN IS: " + str(turn)
+
+    print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+    
+#    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
+    data = setNodes('WEB', 'EU', -1)
+    r = requests.post(url, data=json.dumps(data), headers=headers)
 
 def main():
     init()
-
     r = nextTurn()
 
     while(1):
         payout = r.json()
 
+        print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
         turn = getTurnNo(payout)
 
         print ""
         print "CURRENT TURN IS: " + str(turn)
 #    print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
+
         sumWebTransactions(payout)
         print ""
         r = nextTurn()
         raw_input("Press Enter to continue...")
 
-
 main()
-
-#    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
-#    r = requests.post(url, data=json.dumps(data), headers=headers)
-#    print r.text
