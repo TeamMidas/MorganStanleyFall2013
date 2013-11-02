@@ -97,10 +97,13 @@ def getTransactionTime(payout):
 def getWebTransactions(payout, region):
     return getWebRegions(payout)[region]['NoOfTransactionsInput']
 
-def sumWebTransactions(payout):
+def printWebTransactions(payout):
     AP = getWebTransactions(payout, 'AP')
     EU = getWebTransactions(payout, 'EU')
     NA = getWebTransactions(payout, 'NA')
+    addHistory('AP', AP)
+    addHistory('EU', EU)
+    addHistory('NA', NA)
     print "Asia: " + str(AP)
     print "Europe: " + str(EU)
     print "North America: " + str(NA)
@@ -136,9 +139,34 @@ def addHistory(region, num):
 
 """
     if (len(temp) < 3):
-        temp.append(num)
         return 0
 """
+
+def calcChange(region):
+    global pAP
+    global pEU
+    global pNA
+    global hAP
+    global hEU
+    global hNA
+    dx = 0
+    dx2 = 0
+    temp = []
+    
+    if(region == 'AP'):
+        temp = hAP
+    elif(region == 'EU'):
+        temp = hEU
+    else:
+        temp = hNA
+
+    if(len(temp) < 5):
+        return 0
+
+    #lagrange save for maybe later use
+#    p = (temp[0] * 8) + (temp[1] * -15) + (temp[2] * 16) + (temp[3] * -6) + (temp[4] * 2)
+    
+#    print "PREDICTIONS FOR " + region + " IS: " + str(p)
 
 #Control functions
 def nextTurn():
@@ -172,7 +200,14 @@ def main():
         print "CURRENT TURN IS: " + str(turn)
 #    print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
 
-        sumWebTransactions(payout)
+        printWebTransactions(payout)
+        print ""
+#        print "HISTORY OF ASIA: " + str(hAP)
+#        print "HISTORY OF EUROPE: " + str(hEU)
+#        print "HISTORY OF AMERICA: " + str(hNA)
+        calcChange('AP')
+        calcChange('EU')
+        calcChange('NA')
         print ""
         r = nextTurn()
         raw_input("Press Enter to continue...")
