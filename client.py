@@ -428,8 +428,8 @@ def main():
 #        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
         r = nextTurn()
-        if(turn > 10):
-            plt.show()
-            raw_input("Press Enter to continue...")
+#        if(turn > 2400):
+#            plt.show()
+#            raw_input("Press Enter to continue...")
 
 main()
