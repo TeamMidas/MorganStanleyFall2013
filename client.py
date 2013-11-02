@@ -84,23 +84,27 @@ def getTurnNo(payout):
 def getTransactionTime(payout):
     return payout['ServerState']['TransactionTime']
 
-
 def main():
     data = {'Command': 'INIT', 'Token': token}
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
 #init
     r = requests.post(url, data=json.dumps(data), headers=headers)
+
 #turn 1
     data = {'Command': 'PLAY', 'Token': token}
     r = requests.post(url, data=json.dumps(data), headers=headers)
+
 #turn 2
+    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
+    r = requests.post(url, data=json.dumps(data), headers=headers)
+
     data = {'Command': 'PLAY', 'Token': token}
     r = requests.post(url, data=json.dumps(data), headers=headers)
     payout = r.json()
 
     turn = getTurnNo(payout)
     print "CURRENT TURN IS: " + str(turn)
-    print json.dumps(getWebRegions(payout), sort_keys=True, indent=4, separators=(',', ': '))
+    print json.dumps(payout, sort_keys=True, indent=4, separators=(',', ': '))
 
 main()
 
