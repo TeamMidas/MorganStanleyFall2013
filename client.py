@@ -122,6 +122,17 @@ def printWebTransactions(payout):
 
 def setNodes(tier, region, count):
     CR['Servers'][tier]['ServerRegions'][region]['NodeCount'] = count
+"
+This should give upgrades
+To set nodes and do upgrades do:
+    setNodes(tier, region, count)
+    upgrades(infrastructure, research)
+    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
+    r = requests.post(url, data=json.dumps(data), headers=headers)
+"
+def upgrades(infrastructure, research):
+    CR['Servers']['UpgradeInfrastructure'] = infrastructure
+    CR['Servers']['UpgradeToResearch'] = research
 
 def clearCR():
     CR = {}
@@ -265,16 +276,23 @@ def nextTurn():
 def init():
     data = {'Command': 'INIT', 'Token': token}
     r = requests.post(url, data=json.dumps(data), headers=headers)
-#    payout = r.json()
+    payout = r.json()
 
 #    turn = getTurnNo(payout)
 #    print "CURRENT TURN IS: " + str(turn)
 
 #    print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
+
+
+#    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#    print json.dumps(getResearchUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+
     setNodes('WEB', 'EU', -1)
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
     r = requests.post(url, data=json.dumps(data), headers=headers)
+
 
 
 def main():
