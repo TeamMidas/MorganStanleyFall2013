@@ -352,7 +352,7 @@ def webLogic(payout, region):
         expected = pNA
 
     online = getWebNodeCount(payout, region)
-    serverValue = int(180 * 1.2)
+    serverValue = int(40 * 0.5)
     capacity = online * serverValue
     difference = expected - capacity
     needed = 0
@@ -372,9 +372,8 @@ def webLogic(payout, region):
     elif(difference < serverValue):
         needed = int(difference / serverValue)
         if(online + needed <= 1):
-             needed = needed+1
+             return 0
         if(needed < 0):
-
             print "REMOVED: " + str(needed)
             setNodes('WEB', region, needed)
             return 1
@@ -482,15 +481,22 @@ def main():
     init()
     r = nextTurn()
 
+#    while(1):
+#        r = nextTurn()
+#        payout = r.json()
+#        print getTurnNo(payout)
+#        print r.text
+#        raw_input("Press Enter to continue...")
+
     while(1):
         payout = r.json()
         if(highTurn > getTurnNo(payout)):
             print "CURRENT TURN IS: " + str(getTurnNo(payout))
             break
-        clearCR()
         highTurn = getTurnNo(payout)
         turn = getTurnNo(payout)
         tickDown()
+
         print ""
         print "CURRENT TURN IS: " + str(turn)
         print "TIME IS: " + getTransactionTime(payout)
@@ -540,10 +546,15 @@ def main():
                 data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
                 print data
                 r = requests.post(url, data=json.dumps(data), headers=headers)
+                clearCR()
         
         print "ASIA WEB SERVERS: " + str(goingUpWeb['AP'])
         print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
         print "AMERICA WEB SERVERS: " + str(goingUpWeb['NA'])
+        r = nextTurn()
+        if(turn > 0):
+            raw_input("Press Enter to continue...")
+            #plt.show()
         #plots (turn, profit) as scatter plot
 #        plt.axis([0,turn+10,0,3000])
 #        Profit = getProfitEarned(payout)
@@ -569,10 +580,7 @@ def main():
 #        print 'DB NODES IN EU: ' + json.dumps(getDBNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
-        r = nextTurn()
-        raw_input("Press Enter to continue...")
-        #if(turn > 505):
-#            plt.show()
-           # raw_input("Press Enter to continue...")
-
+        #r = nextTurn()
+        #raw_input("Press Enter to continue...")
+        
 main()
