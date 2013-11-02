@@ -289,9 +289,8 @@ def init():
 
 #    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    print json.dumps(getResearchUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
-    setNodes('WEB', 'EU', -1)
     data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
     r = requests.post(url, data=json.dumps(data), headers=headers)
 
@@ -339,7 +338,11 @@ def main():
         calcChange('NA')
         print ""
 
+#        print 'DB NODES IN NA: ' + json.dumps(getDBNodeCount(payout, 'NA'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#        print 'DB NODES IN EU: ' + json.dumps(getDBNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+
         r = nextTurn()
-        #raw_input("Press Enter to continue...")
+        raw_input("Press Enter to continue...")
 
 main()
