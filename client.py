@@ -500,7 +500,7 @@ def dataLogic(payout):
 
     print "ACTUAL DATABASE LOGIC"
     print ""
-    print "DATA REGION: " + region + " CAPACITY: " + serverValue + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity) + " needed: " + str(needed)
+    print "DATA REGION: " + region + " CAPACITY: " + str(serverValue) + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity) + " needed: " + str(needed)
     print ""
     if(needed > 0 and needed - len(goingUpData[region]) > 0):
         print "ADDED: " + str(needed)
@@ -600,19 +600,9 @@ def tickDown():
     for i in popKey:
         goingDownData[i].pop(j, None)
 
-#    turn = getTurnNo(payout)
-#    print "CURRENT TURN IS: " + str(turn)
-
-    #print "# of EU Servers: " + json.dumps(getWebNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': {'Servers': {'WEB': {'ServerRegions': {'EU': {'NodeCount': '-1'}}}}}}
-
-
 #    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    print json.dumps(getJavaCapacity(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 #    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-
-    #data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
-    #r = requests.post(url, data=json.dumps(data), headers=headers)
 
 def main():
     global highTurn
@@ -730,13 +720,13 @@ def main():
         r = nextTurn() #ALWAYS KEEP
 #        print r.text
         #print "CURRENT TURN IS: " + str(turn)
-        print getResearchUpgradeLevels(payout)
+        #print getResearchUpgradeLevels(payout)
         print ""
-        print getInfrastructureState(payout)
+        #print getInfrastructureState(payout)
         #print getServerCost(payout)
         #print getWebCapacity(payout)
         #raw_input("Press enter")
-        if(turn > 3000 ):
+        if(turn > 1564654 ):
             raw_input("Press Enter to continue...")
 
 
