@@ -127,7 +127,7 @@ def getDBNodeCount(payout, region):
     return getDBRegions(payout)[region]['NodeCount']
 
 def getDBCapacity(payout):
-    return getDBServers(payout)['ServerPerformance']['CapactityLevel'][0]['UpperLimit']
+    return getDBServers(payout)['ServerPerformance']['CapactityLevels'][0]['UpperLimit']
 
 def getTurnNo(payout):
     return payout['ServerState']['TurnNo']
@@ -357,14 +357,14 @@ def webLogic(payout, region):
         expected = pNA
 
     online = getWebNodeCount(payout, region)
-    serverValue = 40
+    serverValue = getWebCapacity(payout)
     capacity = online * serverValue
     difference = expected - capacity
     needed = 0
 
     print "REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
     print ""
-    if(difference > serverValue):
+    if(difference > 0):
         needed = int(difference / serverValue) - (len(goingUpWeb[region]))
         if(needed > 0):
             print "ADDED: " + str(needed)
@@ -374,7 +374,7 @@ def webLogic(payout, region):
                 upID = upID+1
                 needed = needed-1
             return 1
-    elif(difference < serverValue):
+    elif(difference < 0):
         needed = int(difference / serverValue)
         if(online + needed <= 1):
              return 0
@@ -396,14 +396,14 @@ def javaLogic(payout, region):
         expected = pNA
 
     online = getJavaNodeCount(payout, region)
-    serverValue = 100
+    serverValue = getJavaCapacity(payout)
     capacity = online * serverValue
     difference = expected - capacity
     needed = 0
 
     print "WHEEE JAVA REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
     print ""
-    if(difference > serverValue):
+    if(difference > 0):
         needed = int(difference / serverValue) - (len(goingUpJava[region]))
         if(needed > 0):
             print "ADDED: " + str(needed)
@@ -413,10 +413,10 @@ def javaLogic(payout, region):
                 upID = upID+1
                 needed = needed-1
             return 1
-    elif(difference < serverValue):
-        needed = int(difference / serverValue) - (len(goingDownJava[region]))
+    elif(difference < 0):
+        needed = int(difference / serverValue) + (len(goingDownJava[region]))
         if(online + needed <= 1):
-             needed = needed+1
+             return 0
         if(needed < 0):
             print "REMOVED: " + str(needed)
             while(needed < 0):
@@ -437,13 +437,15 @@ def dataLogic(payout):
 
     region = preferredR
 
+    serverValue = int(getDBCapacity(payout) * 1.25)
+
     if(migration > 0):
         migration = migration - 1
         return dataMove(payout)
 
-    if(pNA > 1500 and hNA[4] > 1200):
+    if(pNA > serverValue * 4 and hNA[4] > serverValue * 3 and pEU < serverValue * 3):
         preferredR = 'NA'
-    elif((pEU > 1500 and hEU[4] > 1200 and pNA < 400 and hNA[4] < 600 and hNA[3] < 600 ) or (pAP > 1650 and hAP[4] > 1350 and pEU > 1500 and hEU[4] > 1500 and pNA <800 and hNA[4] <800)):
+    elif((pEU > serverValue * 4 and hEU[4] > serverValue * 3 and pNA < 400 and hNA[4] < 600 and hNA[3] < 600 ) or (pAP > serverValue * 4 and hAP[4] > serverValue * 3 and pEU > serverValue * 3 and hEU[4] > serverValue * 4 and pNA < serverValue * 2 and hNA[4] < serverValue * 2)):
         preferredR = 'EU'
 
     #start of migration to new main area
@@ -460,12 +462,11 @@ def dataLogic(payout):
 
     expected = pAP + pEU + pNA
     online = getDBNodeCount(payout, region)
-    serverValue = 350
     capacity = online * serverValue
     difference = expected - capacity
     needed = 0
 
-    print "DATA REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
+    #print "DATA REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
     print ""
     if(difference > serverValue):
         needed = int(difference / serverValue) - (len(goingUpData[region]))
@@ -503,10 +504,6 @@ def dataMove(payout):
             return 1
     else:
         return 0
-    #lagrange save for maybe later use
-#    p = (temp[0] * 8) + (temp[1] * -15) + (temp[2] * 16) + (temp[3] * -6) + (temp[4] * 2)
-    
-#    print "PREDICTIONS FOR " + region + " IS: " + str(p)
 
 #Control functions
 def nextTurn():
@@ -637,26 +634,24 @@ def main():
         #print "Money earned this turn: " + str(getProfitEarned(payout))
         #print ""
 
-        #if(turn > 10):
-        #    if(difAP < abs(hAP[4]-pAP)):
-        #        difAP = abs(hAP[4] - pAP)
-        #    if(difEU < abs(hEU[4] - pEU)):
-        #        difEU = abs(hEU[4]-pEU)
-        #    if(difNA < abs(hNA[4] - pNA)):
-        #        difNA = abs(hNA[4] - pNA)
-        #    avgAP = (((avgAP * (turn - 11)) + abs(hAP[4] - pAP)) / (turn - 10))
-        #    avgEU = (((avgEU * (turn - 11)) + abs(hEU[4] - pEU)) / (turn - 10))
-        #    avgNA = (((avgNA * (turn - 11)) + abs(hNA[4] - pNA)) / (turn - 10))
+        if(turn > 10):
+            if(difAP < abs(hAP[4]-pAP)):
+                difAP = abs(hAP[4] - pAP)
+            if(difEU < abs(hEU[4] - pEU)):
+                difEU = abs(hEU[4]-pEU)
+            if(difNA < abs(hNA[4] - pNA)):
+                difNA = abs(hNA[4] - pNA)
+            avgAP = (((avgAP * (turn - 11)) + abs(hAP[4] - pAP)) / (turn - 10))
+            avgEU = (((avgEU * (turn - 11)) + abs(hEU[4] - pEU)) / (turn - 10))
+            avgNA = (((avgNA * (turn - 11)) + abs(hNA[4] - pNA)) / (turn - 10))
 
-        #if(getProfitAccumulated(payout) > 300000):
-         #   upgradesInfrastructure('GRID')
-            #print "Average Mistake ASIA: " + str(avgAP)
-            #print "Average Mistake EUROPE: " + str(avgEU)
-            #print "Average Mistake AMERICA: " + str(avgNA)
-            #print ""
-            #print "Highest mistake ASIA: " + str(difAP)
-            #print "Highest mistake EUROPE: " + str(difEU)
-            #print "Highest mistake AMERICA: " + str(difNA)
+            print "Average Mistake ASIA: " + str(avgAP)
+            print "Average Mistake EUROPE: " + str(avgEU)
+            print "Average Mistake AMERICA: " + str(avgNA)
+            print ""
+            print "Highest mistake ASIA: " + str(difAP)
+            print "Highest mistake EUROPE: " + str(difEU)
+            print "Highest mistake AMERICA: " + str(difNA)
 
         print ""
 #        print "HISTORY OF ASIA: " + str(hAP)
@@ -676,8 +671,9 @@ def main():
             z = z + javaLogic(payout, 'NA')
             z = z + dataLogic(payout)
             if(z > 0):
-                if(wtf == 1 and getProfitAccumulated(payout) >= 300000):
-                    upgradesResearch("Grid")
+                if(wtf == 1): #and getProfitAccumulated(payout) >= 300000):
+                    #upgradesResearch('Grid')
+                    upgradesInfrastructure('true')
                     #lol = turn
                     wtf = 0
                     #raw_input("WTF IT RAN")
@@ -685,9 +681,7 @@ def main():
                 print data
                 r = requests.post(url, data=json.dumps(data), headers=headers)
                 clearCR()
-                print " STUFFFF"
                 print r.text
-                print " STUFFFFF"
 
 #        print "ASIA WEB SERVERS: " + str(goingUpWeb['AP'])
 #        print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
@@ -699,15 +693,39 @@ def main():
         #print "EUROPE JAVA SERVERS DOWN: " + str(goingDownJava['EU'])
         #print "AMERICA JAVA SERVERS DOWN: " + str(goingDownJava['NA'])
         print ""
-        #print(getServerCost(payout))
         print 'RESEARCH: ' + json.dumps(getResearchUpgradeState(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
         r = nextTurn() #ALWAYS KEEP
 #        print r.text
         print "CURRENT TURN IS: " + str(turn)
+        print getResearchUpgrades(payout)
+        print getServerCost(payout)
+        print getWebCapacity(payout)
         #raw_input("Press enter")
-        if(turn > lol):
+        if(turn > 1500 ):
             raw_input("Press Enter to continue...")
-            #plt.show()
+
+
+#        print 'DB NODES IN NA: ' + json.dumps(getDBNodeCount(payout, 'NA'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#        print 'DB NODES IN EU: ' + json.dumps(getDBNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+#        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+
+main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+           #plt.show()
         #plots (turn, profit) as scatter plot
 #        plt.axis([0,turn+10,0,3000])
 #        Profit = getProfitEarned(payout)
@@ -727,13 +745,3 @@ def main():
         #this is for live plotting only
 #        plt.pause(0.00000000000000000000000000000000000000000001)
 #        plt.draw()
-
-
-#        print 'DB NODES IN NA: ' + json.dumps(getDBNodeCount(payout, 'NA'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#        print 'DB NODES IN EU: ' + json.dumps(getDBNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-
-        #r = nextTurn()
-        #raw_input("Press Enter to continue...")
-        
-main()
