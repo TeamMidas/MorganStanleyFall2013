@@ -43,7 +43,7 @@ expendedMoney = 0
 upInfra = 2
 upTech = 0
 
-researchList = { 1: "Grid", 2:"Low Latency", 3: "Green" }
+researchList = { 1: "Grid", 2:"Low Latency", 3: "Green", 4:"WAN" }
 
 goingUpWeb = {'AP': {}, 'EU': {}, 'NA': {}}
 goingUpJava = {'AP': {}, 'EU': {}, 'NA': {}}
@@ -176,7 +176,7 @@ def upgradeLogic(payout):
     global upTech
     global upInfra
 
-    if(upTech >= 3):
+    if(upTech >= 4):
         return 0 
 
   #  if(getInfrastructureState(payout)['Key'] != 'LEVEL2' and upInfra > 1):
@@ -184,7 +184,7 @@ def upgradeLogic(payout):
   #      upInfra = upInfra - 1
   #        return 1
 
-    if(getProfitAccumulated(payout) > 90000 and upTech == 0):
+    if(getProfitAccumulated(payout) > 20000 and upTech == 0):
         upgradesResearch("Grid")
         upTech = 1
         return 1
@@ -197,6 +197,10 @@ def upgradeLogic(payout):
     if "Low_Latency" in getResearchUpgradeState(payout):
         if(getResearchUpgradeState(payout)["Low_Latency"] == -1):
             upgradeResearch("Green")
+        return 1
+    if "Green" in getResearchUpgradeState(payout):
+        if(getResearchUpgradeState(payout)["Green"] == -1):
+            upgradeResearch("WAN_COMPRESSION")
         return 1
 
     #if(getInfrastructureState(payout)['Key'] == 'LEVEL1' and getInfrastructureState(payout)['Value'] == -1):
@@ -738,7 +742,7 @@ def main():
         print ""
         #print getServerCost(payout)
         #print getWebCapacity(payout)
-        #raw_input("Press enter")
+#        raw_input("Press enter")
         if(turn > 123456 ):
             raw_input("Press Enter to continue...")
 
