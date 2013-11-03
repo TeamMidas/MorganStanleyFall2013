@@ -198,17 +198,16 @@ def upgradeLogic(payout):
 #        upInfra = upInfra - 1
 #        return 1
 
-    if(cash > 100000 and upTech == 0):
+    if(cash > 90000 and upTech == 0):
         upgradesResearch("GRID")
         upTech = 1
         expendedmoney = expendedmoney + 150000
         return 1
 
-    if(upTech == 1):
-        if(getResearchUpgradeState(payout)["GRID"] == -1 and cash > 100000):
+    if(upTech == 1 and turncount <= 5000):
+        if(getResearchUpgradeState(payout)["GRID"] == -1 and cash > 90000):
             upgradesResearch("GREEN")
             upTech = 2
-            expendedmoney = 0
             expendedmoney = 400000
             return 1
 
