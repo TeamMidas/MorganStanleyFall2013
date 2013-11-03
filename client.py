@@ -19,34 +19,45 @@ import json, urllib, urllib2
 import math
 import operator
 import requests
-from pylab import *
 
 url = 'http://hermes.wha.la/api/hermes'
 token = 'f6ead613-de05-4a51-bda4-76ae2448c1b8'
 headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-pAP = 0
-pEU = 0
-pNA = 0
-hAP = []
-hEU = []
+
+#projected Demands for the next minute
+pAP = 0 
+pEU = 0 
+pNA = 0 
+
+#history of actual demands, goes back 4 minutes
+hAP = [] 
+hEU = [] 
 hNA = []
-highTurn = 0
+
+#prediction error
 difAP = 0
 difNA = 0
 difEU = 0
+
+#ChangeRequests
 CR = {}
+
 trend = 0
+
+#Database migration
 preferredR = 'EU'
 migration = 0
 oldregion = 'EU'
+
+#upgrades
 expendedmoney = 0
 upInfra = 2
 upTech = 0
+
+#database change rate normalizing
 turncount = 0
 idealDB = 0
 nextTurn = 12
-
-researchList = { 1: "Grid", 2:"Low Latency", 3: "Green", 4:"WAN" }
 
 goingUpWeb = {'AP': {}, 'EU': {}, 'NA': {}}
 goingUpJava = {'AP': {}, 'EU': {}, 'NA': {}}
@@ -57,8 +68,6 @@ goingDownData = {'AP': {}, 'EU': {}, 'NA': {}}
 
 downID = 1
 upID = 1
-
-fig = plt.figure()
 
 #JSON parsing functions
 def getCostIncured(payout):
@@ -158,7 +167,7 @@ def printWebTransactions(payout):
 
 def setNodes(tier, region, count):
     global CR
-    #CR['Servers'][tier]['ServerRegions'][region]['NodeCount'] = count
+
     if(len(CR) == 0):
         CR['Servers'] = {}
     if tier not in CR['Servers']:
@@ -216,15 +225,6 @@ def upgradeLogic(payout):
             return 1
 
     return 0
-
-"""
-This should give upgrades
-To set nodes and do upgrades do:
-    setNodes(tier, region, count)
-    upgrades(infrastructure, research)
-    data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
-    r = requests.post(url, data=json.dumps(data), headers=headers)
-"""
 
 def clearCR():
     global CR
@@ -285,7 +285,6 @@ def calcChange(region):
         if(spike > 10):
             p = temp[4]
         else:
-            #v = 2**spike
             v = math.log(spike) * 1.5
             if(temp[4] - temp[3] > 0):
                 p = temp[4] + int((temp[4] - temp[3]) * v)
@@ -538,10 +537,8 @@ def dataLogic(payout):
             needed = needed-1
         return 1
 
-    print "ACTUAL DATABASE LOGIC"
-    print ""
-    print "DATA REGION: " + region + " SERVER SIZE: " + str(serverValue) + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity) + " needed: " + str(needed)
-    print ""
+#    print "DATA REGION: " + region + " SERVER SIZE: " + str(serverValue) + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity) + " needed: " + str(needed)
+#    print ""
 
     if(abs(difference) > (serverValue * 1.1)):
         if(difference > 0):
@@ -644,12 +641,7 @@ def tickDown():
     for i in popKey:
         goingDownData[i].pop(j, None)
 
-#    print json.dumps(getInfrastructureUpgrades(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#    print json.dumps(getJavaCapacity(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-
 def main():
-    global highTurn
     global difAP
     global difEU
     global difNA
@@ -659,21 +651,12 @@ def main():
     avgAP = 0.0
     avgEU = 0.0
     avgNA = 0.0
-    researchTicker = 4320
+
     init()
     r = nextTurn()
-#    while(1):
-#        r = nextTurn()
-#        payout = r.json()
-#        print getTurnNo(payout)
-#        print r.text
-#        raw_input("Press Enter to continue...")
 
     while(1):
         payout = r.json()
-        if(highTurn > getTurnNo(payout)):
-            print "CURRENT TURN IS: " + str(getTurnNo(payout))
-            break
         turnCount = getTurnNo(payout)
         turn = getTurnNo(payout)
         tickDown()
@@ -697,10 +680,8 @@ def main():
         print "# of EU DATA Servers: " + str(getDBNodeCount(payout, 'EU'))
         print "# of NA DATA Servers: " + str(getDBNodeCount(payout, 'NA'))
         print ""
-        
-        print ""
-        #print ""
 
+        #gathers data about my predictions
         if(turn > 10):
             if(difAP < abs(hAP[4]-pAP)):
                 difAP = abs(hAP[4] - pAP)
@@ -716,11 +697,11 @@ def main():
             print "Average Mistake EUROPE: " + str(avgEU)
             print "Average Mistake AMERICA: " + str(avgNA)
             print ""
-            print "Highest mistake ASIA: " + str(difAP)
-            print "Highest mistake EUROPE: " + str(difEU)
-            print "Highest mistake AMERICA: " + str(difNA)
+            #print "Highest mistake ASIA: " + str(difAP)
+            #print "Highest mistake EUROPE: " + str(difEU)
+            #print "Highest mistake AMERICA: " + str(difNA)
+            #print ""
 
-        print ""
 #        print "HISTORY OF ASIA: " + str(hAP)
 #        print "HISTORY OF EUROPE: " + str(hEU)
 #        print "HISTORY OF AMERICA: " + str(hNA)
@@ -745,74 +726,27 @@ def main():
                 clearCR()
                 #print r.text
 
-#        print "ASIA WEB SERVERS: " + str(goingUpWeb['AP'])
-#        print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
-#        print "AMERICA WEB SERVERS: " + str(goingUpWeb['NA'])
+        #print "ASIA WEB SERVERS: " + str(goingUpWeb['AP'])
+        #print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
+        #print "AMERICA WEB SERVERS: " + str(goingUpWeb['NA'])
         #print "ASIA JAVA SERVERS: " + str(goingUpJava['AP'])
         #print "EUROPE JAVA SERVERS: " + str(goingUpJava['EU'])
         #print "AMERICA JAVA SERVERS: " + str(goingUpJava['NA'])
         #print "ASIA JAVA SERVERS DOWN: " + str(goingDownJava['AP'])
         #print "EUROPE JAVA SERVERS DOWN: " + str(goingDownJava['EU'])
         #print "AMERICA JAVA SERVERS DOWN: " + str(goingDownJava['NA'])
-        print "ASIA DATA SERVERS: " + str(goingUpData['AP'])
-        print "EUROPE DATA SERVERS: " + str(goingUpData['EU'])
-        print "AMERICA DATA SERVERS: " + str(goingUpData['NA'])
-        print "ASIA DATA SERVERS DOWN: " + str(goingDownData['AP'])
-        print "EUROPE DATA SERVERS DOWN: " + str(goingDownData['EU'])
-        print "AMERICA DATA SERVERS DOWN: " + str(goingDownData['NA'])
-        print ""
-        print 'RESEARCH: ' + json.dumps(getResearchUpgradeState(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+        #print "ASIA DATA SERVERS: " + str(goingUpData['AP'])
+        #print "EUROPE DATA SERVERS: " + str(goingUpData['EU'])
+        #print "AMERICA DATA SERVERS: " + str(goingUpData['NA'])
+        #print "ASIA DATA SERVERS DOWN: " + str(goingDownData['AP'])
+        #print "EUROPE DATA SERVERS DOWN: " + str(goingDownData['EU'])
+        #print "AMERICA DATA SERVERS DOWN: " + str(goingDownData['NA'])
+        #print ""
+        #print 'RESEARCH: ' + json.dumps(getResearchUpgradeState(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+
         r = nextTurn() #ALWAYS KEEP
-#        print r.text
-        #print "CURRENT TURN IS: " + str(turn)
-        print getResearchUpgradeLevels(payout)
-        print ""
-        #print getInfrastructureState(payout)
-        print ""
-        print ""
-        #print getServerCost(payout)
-        #print getWebCapacity(payout)
-#        raw_input("Press enter")
-        if(turn > 123456 ):
-            raw_input("Press Enter to continue...")
-
-
-#        print 'DB NODES IN NA: ' + json.dumps(getDBNodeCount(payout, 'NA'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#        print 'DB NODES IN EU: ' + json.dumps(getDBNodeCount(payout, 'EU'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
-#        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
+        
+        #if(turn > 123456 ):
+        #    raw_input("Press Enter to continue...")
 
 main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-           #plt.show()
-        #plots (turn, profit) as scatter plot
-#        plt.axis([0,turn+10,0,3000])
-#        Profit = getProfitEarned(payout)
-#        plt.scatter(turn, Profit, color='green')
-
-
-        #plt.axis([0,turn+10,0,500])
-        #TransNA = getWebTransactions(payout, 'NA')
-        #TransEU = getWebTransactions(payout, 'EU')
-        #TransAP = getWebTransactions(payout, 'AP')
-
-
-        #plt.scatter(turn, TransNA, color='red')
-        #plt.scatter(turn, TransEU, color='blue')
-        #plt.scatter(turn, TransAP, color='orange')
-        
-        #this is for live plotting only
-#        plt.pause(0.00000000000000000000000000000000000000000001)
-#        plt.draw()
