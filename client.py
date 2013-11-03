@@ -39,6 +39,11 @@ trend = 0
 preferredR = 'EU'
 migration = 0
 oldregion = 'EU'
+expendedMoney = 0
+upInfra = 0
+upTech = 0
+
+researchList = { 1: 'Grid', 2:'Low Latency', 3:'Green' }
 
 goingUpWeb = {'AP': {}, 'EU': {}, 'NA': {}}
 goingUpJava = {'AP': {}, 'EU': {}, 'NA': {}}
@@ -46,7 +51,6 @@ goingUpData = {'AP': {}, 'EU': {}, 'NA': {}}
 
 goingDownJava = {'AP': {}, 'EU': {}, 'NA': {}}
 goingDownData = {'AP': {}, 'EU': {}, 'NA': {}}
-
 
 downID = 1
 upID = 1
@@ -84,7 +88,7 @@ def getPlayFileName(payout):
 def getProfitAccumulated(payout):
     return payout['ServerState']['ProfitAccumulated']
 
-def getResearchUpgrades(payout):
+def getResearchUpgradeLevels(payout):
     return payout['ServerState']['ResearchUpgradeLevels']
 
 def getResearchUpgradeState(payout):
@@ -167,6 +171,33 @@ def upgradesInfrastructure(infrastructure):
 
 def upgradesResearch(research):
     CR['UpgradeToResearch'] = research
+
+def upgradeLogic(payout):
+    global expendedmoney
+    global upTech
+    global upInfra
+
+    if(getInfrastructureState(payout)['Key'] == 'LEVEL1' and upInfra == 1 and getInfrastructureState(payout)[Value] == -1):
+        upInfra = 0
+    if(getInfrastructureState(payout)['Key'] != 'LEVEL2' and upInfra == 0 and getProfitAccumulated(payout) > 20000):
+        upgradesInfrastructure('true')
+        upInfra == 1
+        print "UPGRADING INFRASTRUCTURE"
+        return 1
+
+    if(upTech == 0 and getProfitAccumulated(payout) >= 25000):
+        upgradesResearch(researchList[1])
+        upTech = 1
+        print "RESEARCHING: " + researchList[upTech]
+        return 1
+
+    if(upTech > 1 and upTech < 4 and getResearchUpgradeState(payout)[researchList[upTech]] == -1 and getProfitAccumulated(payout) > 300000):
+        upgradeResearch(researchList[upTech + 1])
+        upTech = upTech + 1
+        print "RESEARCHING: " + researchList[upTech]
+        return 1
+
+    return 0
 
 """
 This should give upgrades
@@ -362,12 +393,12 @@ def webLogic(payout, region):
     difference = expected - capacity
     needed = 0
 
-    print "REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
-    print ""
+    #print "REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
+    #print ""
     if(difference > 0):
         needed = int(difference / serverValue) - (len(goingUpWeb[region]))
         if(needed > 0):
-            print "ADDED: " + str(needed)
+            #print "WEB ADDED: " + str(needed)
             setNodes('WEB', region, needed)
             while(needed > 0):
                 goingUpWeb[region][upID] = 2
@@ -379,7 +410,7 @@ def webLogic(payout, region):
         if(online + needed <= 1):
              return 0
         if(needed < 0):
-            print "REMOVED: " + str(needed)
+            #print "WEB REMOVED: " + str(needed)
             setNodes('WEB', region, needed)
             return 1
     return 0
@@ -401,12 +432,12 @@ def javaLogic(payout, region):
     difference = expected - capacity
     needed = 0
 
-    print "WHEEE JAVA REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
-    print ""
+   # print "JAVA REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
+   # print ""
     if(difference > 0):
         needed = int(difference / serverValue) - (len(goingUpJava[region]))
         if(needed > 0):
-            print "ADDED: " + str(needed)
+            #print "JAVA ADDED: " + str(needed)
             setNodes('JAVA', region, needed)
             while(needed > 0):
                 goingUpJava[region][upID] = 4
@@ -418,7 +449,7 @@ def javaLogic(payout, region):
         if(online + needed <= 1):
              return 0
         if(needed < 0):
-            print "REMOVED: " + str(needed)
+            #print "JAVA REMOVED: " + str(needed)
             while(needed < 0):
                 setNodes('JAVA', region, needed)
                 goingDownJava[region][upID] = 1
@@ -440,6 +471,7 @@ def dataLogic(payout):
     serverValue = int(getDBCapacity(payout) * 1.25)
 
     if(migration > 0):
+        print "CURRENTLY MIGRATING"
         migration = migration - 1
         return dataMove(payout)
 
@@ -464,32 +496,28 @@ def dataLogic(payout):
     online = getDBNodeCount(payout, region)
     capacity = online * serverValue
     difference = expected - capacity
-    needed = 0
+    needed = int(difference / serverValue)
 
-    #print "DATA REGION: " + region + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity)
+    print "ACTUAL DATABASE LOGIC"
     print ""
-    if(difference > serverValue):
-        needed = int(difference / serverValue) - (len(goingUpData[region]))
-        if(needed > 0):
-            print "ADDED: " + str(needed)
+    print "DATA REGION: " + region + " CAPACITY: " + serverValue + " DIFFERENCE: " + str(difference) + " CAPACITY: " + str(capacity) + " needed: " + str(needed)
+    print ""
+    if(needed > 0 and needed - len(goingUpData[region]) > 0):
+        print "ADDED: " + str(needed)
+        setNodes('DB', region, needed)
+        while(needed > 0):
+            goingUpData[region][upID] = 8
+            upID = upID+1
+            needed = needed-1
+        return 1
+    elif(needed < 0 and needed + len(goingDownData) < 0 and online + len(goingDownData[region]) + needed > 0):
+        print "REMOVED: " + str(needed)
+        while(needed < 0):
             setNodes('DB', region, needed)
-            while(needed > 0):
-                goingUpData[region][upID] = 8
-                upID = upID+1
-                needed = needed-1
-            return 1
-    elif(difference < serverValue):
-        needed = int(difference / serverValue) - (len(goingDownData[region]))
-        if(online + needed <= 1):
-            return 0
-        if(needed < 0):
-            print "REMOVED: " + str(needed)
-            while(needed < 0):
-                setNodes('DB', region, needed)
-                goingDownData[region][upID] = 2
-                downID = downID+1
-                needed = needed+1
-            return 1
+            goingDownData[region][upID] = 2
+            downID = downID+1
+            needed = needed+1
+        return 1
     return 0
 
 def dataMove(payout):
@@ -629,9 +657,13 @@ def main():
         #print "# of AP JAVA Servers: " + str(getJavaNodeCount(payout, 'AP'))
         #print "# of EU JAVA Servers: " + str(getJavaNodeCount(payout, 'EU'))
         #print "# of NA JAVA Servers: " + str(getJavaNodeCount(payout, 'NA'))
-        #print ""
-        #print "Money earned so far: " + str(getProfitAccumulated(payout))
-        #print "Money earned this turn: " + str(getProfitEarned(payout))
+        print "# of AP DATA Servers: " + str(getDBNodeCount(payout, 'AP'))
+        print "# of EU DATA Servers: " + str(getDBNodeCount(payout, 'EU'))
+        print "# of NA DATA Servers: " + str(getDBNodeCount(payout, 'NA'))
+        print ""
+        print "Money earned so far: " + str(getProfitAccumulated(payout))
+        print "Money earned this turn: " + str(getProfitEarned(payout))
+        print ""
         #print ""
 
         if(turn > 10):
@@ -670,18 +702,13 @@ def main():
             z = z + javaLogic(payout, 'EU')
             z = z + javaLogic(payout, 'NA')
             z = z + dataLogic(payout)
+            z = z + upgradeLogic(payout)
             if(z > 0):
-                if(wtf == 1): #and getProfitAccumulated(payout) >= 300000):
-                    #upgradesResearch('Grid')
-                    upgradesInfrastructure('true')
-                    #lol = turn
-                    wtf = 0
-                    #raw_input("WTF IT RAN")
                 data = {'Command': 'CHNG', 'Token': token, 'ChangeRequest': CR}
-                print data
+                #print data
                 r = requests.post(url, data=json.dumps(data), headers=headers)
                 clearCR()
-                print r.text
+                #print r.text
 
 #        print "ASIA WEB SERVERS: " + str(goingUpWeb['AP'])
 #        print "EUROPE WEB SERVERS: " + str(goingUpWeb['EU'])
@@ -692,16 +719,24 @@ def main():
         #print "ASIA JAVA SERVERS DOWN: " + str(goingDownJava['AP'])
         #print "EUROPE JAVA SERVERS DOWN: " + str(goingDownJava['EU'])
         #print "AMERICA JAVA SERVERS DOWN: " + str(goingDownJava['NA'])
+        print "ASIA DATA SERVERS: " + str(goingUpData['AP'])
+        print "EUROPE DATA SERVERS: " + str(goingUpData['EU'])
+        print "AMERICA DATA SERVERS: " + str(goingUpData['NA'])
+        print "ASIA DATA SERVERS DOWN: " + str(goingDownData['AP'])
+        print "EUROPE DATA SERVERS DOWN: " + str(goingDownData['EU'])
+        print "AMERICA DATA SERVERS DOWN: " + str(goingDownData['NA'])
         print ""
         print 'RESEARCH: ' + json.dumps(getResearchUpgradeState(payout), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
         r = nextTurn() #ALWAYS KEEP
 #        print r.text
-        print "CURRENT TURN IS: " + str(turn)
-        print getResearchUpgrades(payout)
-        print getServerCost(payout)
-        print getWebCapacity(payout)
+        #print "CURRENT TURN IS: " + str(turn)
+        print getResearchUpgradeLevels(payout)
+        print ""
+        print getInfrastructureState(payout)
+        #print getServerCost(payout)
+        #print getWebCapacity(payout)
         #raw_input("Press enter")
-        if(turn > 1500 ):
+        if(turn > 3000 ):
             raw_input("Press Enter to continue...")
 
 
