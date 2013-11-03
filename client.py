@@ -46,7 +46,7 @@ turncount = 0
 idealDB = 0
 nextTurn = 12
 
-researchList = { 1: "Grid", 2:"Low Latency", 3: "Green" }
+researchList = { 1: "Grid", 2:"Low Latency", 3: "Green", 4:"WAN" }
 
 goingUpWeb = {'AP': {}, 'EU': {}, 'NA': {}}
 goingUpJava = {'AP': {}, 'EU': {}, 'NA': {}}
@@ -772,7 +772,7 @@ def main():
         print ""
         #print getServerCost(payout)
         #print getWebCapacity(payout)
-        #raw_input("Press enter")
+#        raw_input("Press enter")
         if(turn > 123456 ):
             raw_input("Press Enter to continue...")
 
