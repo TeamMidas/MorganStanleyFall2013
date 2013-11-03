@@ -39,7 +39,7 @@ trend = 0
 preferredR = 'EU'
 migration = 0
 oldregion = 'EU'
-expendedmoney = 0
+expendedMoney = 0
 upInfra = 2
 upTech = 0
 turncount = 0
@@ -178,42 +178,36 @@ def upgradesResearch(research):
 def upgradeLogic(payout):
     global upTech
     global upInfra
-    global expendedmoney
 
-    cash = getProfitAccumulated(payout)
-    if(upTech >= 2):
+    if(upTech >= 3):
         return 0 
 
-#    if(getInfrastructureState(payout)['Key'] != 'LEVEL2' and upInfra > 1):
-#        upgradesInfrastructure('true')
-#        upInfra = upInfra - 1
-#        return 1
+  #  if(getInfrastructureState(payout)['Key'] != 'LEVEL2' and upInfra > 1):
+  #      upgradesInfrastructure('true')
+  #      upInfra = upInfra - 1
+  #        return 1
 
-    if(cash > 100000 and upTech == 0):
-        upgradesResearch("GRID")
+    if(getProfitAccumulated(payout) > 90000 and upTech == 0):
+        upgradesResearch("Grid")
         upTech = 1
-        expendedmoney = expendedmoney + 150000
         return 1
 
-    if(upTech == 1):
-        if(getResearchUpgradeState(payout)["GRID"] == -1 and cash > 90000 + expendedmoney):
-            upgradesResearch("GREEN")
-            upTech = 2
-            expendedmoney = 0
-            expendedmoney = 400000
-            return 1
+    if "Grid" in getResearchUpgradeState(payout):
+        if(getResearchUpgradeState(payout)["Grid"] == -1):
+            upgradeResearch("Low_Latency")
+        return 1
 
-        if(getResearchUpgradeState(payout)["GRID"] <= 2000 and cash > 400000 + expendedmoney):
-            upgradesResearch("GREEN")
-            upTech = 2
-            expendedmoney = 8000000
-            return 1
+    if "Low_Latency" in getResearchUpgradeState(payout):
+        if(getResearchUpgradeState(payout)["Low_Latency"] == -1):
+            upgradeResearch("Green")
+        return 1
 
-        if(getResearchUpgradeState(payout)["GRID"] > 2000 and cash > 800000 + expendedmoney):
-            upgradesResearch("GREEN")
-            upTech = 2
-            expendedmoney = 12000000
-            return 1
+    #if(getInfrastructureState(payout)['Key'] == 'LEVEL1' and getInfrastructureState(payout)['Value'] == -1):
+    #    upgradesInfrastructure('true')
+   #        return 1
+
+
+
 
     return 0
 
@@ -483,8 +477,8 @@ def dataLogic(payout):
     global preferredR
     global migration
     global oldregion
-    global idealDB
     global nextTurn
+    global idealDB
 
     expected = 0
 
@@ -513,13 +507,16 @@ def dataLogic(payout):
         migration = 10
         oldregion = region
         return 1
+###
+    #if(getTurnNo(payout) % 2 == 0):
+     #   return 0
 
     expected = pAP + pEU + pNA
     online = getDBNodeCount(payout, region)
     capacity = online * serverValue
     difference = expected - capacity
     needed = int(difference / serverValue)
-
+    
     #attempt to stop the database size swinging
     if(turnCount == nextTurn):
         nextTurn = nextTurn + 4
@@ -556,8 +553,8 @@ def dataLogic(payout):
         else:
             if(needed < 0 and online + needed - len(goingDownData[region]) > idealDB):
                 print "REMOVED: " + str(needed)
+                setNodes('DB', region, needed)
                 while(needed < 0):
-                    setNodes('DB', region, needed)
                     goingDownData[region][downID] = 2
                     downID = downID+1
                     needed = needed+1
@@ -649,13 +646,12 @@ def tickDown():
 #    print json.dumps(payout['ServerState'], sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
 def main():
+    global turnCount
     global highTurn
     global difAP
     global difEU
     global difNA
     global CR
-    global turnCount
-
     avgAP = 0.0
     avgEU = 0.0
     avgNA = 0.0
@@ -766,14 +762,12 @@ def main():
 #        print r.text
         #print "CURRENT TURN IS: " + str(turn)
         print getResearchUpgradeLevels(payout)
-        print ""
         #print getInfrastructureState(payout)
-        print ""
         print ""
         #print getServerCost(payout)
         #print getWebCapacity(payout)
         #raw_input("Press enter")
-        if(turn > 123456 ):
+        if(turn > 5 ):
             raw_input("Press Enter to continue...")
 
 
@@ -782,14 +776,6 @@ def main():
 #        print 'DB NODES IN AP: ' + json.dumps(getDBNodeCount(payout, 'AP'), sort_keys=True, indent=4, separators=(',', ': ')) + "\n"
 
 main()
-
-
-
-
-
-
-
-
 
 
 
